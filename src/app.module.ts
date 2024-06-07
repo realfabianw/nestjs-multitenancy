@@ -1,22 +1,26 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { HttpLoggerMiddleware } from './http-logger.middleware';
 import { TodosModule } from './todos/todos.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+      }),
+    }),
     AuthModule,
-    TodosModule,
-    MongooseModule.forRoot(
-      'mongodb://root:80HO39gHz19soqZHUN39QwGfN3XZ9hob@localhost:27017/?authMechanism=DEFAULT',
-    ),
     UsersModule,
+    TodosModule,
   ],
-  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

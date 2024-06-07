@@ -1,32 +1,29 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
+import { EncryptionModule } from '../encryption/encryption.module';
+import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt';
-import { SetMetadata } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './auth.guard';
-
-export const IS_PUBLIC_KEY = 'isPublic';
-export const JWT_SECRET = 'top-secret-key';
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    UsersModule,
-    JwtModule.register({
-      global: true,
-      secret: JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
+        },
+      }),
     }),
+    UsersModule,
+    EncryptionModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}

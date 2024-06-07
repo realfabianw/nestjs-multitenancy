@@ -4,8 +4,8 @@ import { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class Todo {
-  @Prop()
-  _id: string;
+  // Will be added by Mongoose responses
+  id: string;
   @Prop()
   title: string;
   @Prop()

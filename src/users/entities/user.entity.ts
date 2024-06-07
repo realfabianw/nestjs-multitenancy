@@ -3,8 +3,8 @@ import { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class User {
-  @Prop()
-  _id: string;
+  // Will be added by Mongoose responses
+  id: string;
   @Prop()
   email: string;
   @Prop()
