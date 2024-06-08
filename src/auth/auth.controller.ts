@@ -7,18 +7,18 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { CreateUserDto } from '../users/entities/dto/create-user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { AuthenticationResponse } from './entities/authentication-response.entity';
+import { AuthenticationResponse } from './entities/dto/authentication-response.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import LoginDto from './entities/dto/login.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import UserResponseDto from '../users/entities/dto/user-response.dto';
+import UserResponseDto from '../users/dto/user-response.dto';
 import { Public } from './auth.decorator';
-import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { User } from '../drizzle/schema';
 import { Request } from 'express';
 

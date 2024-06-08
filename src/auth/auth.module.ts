@@ -5,9 +5,9 @@ import { UsersModule } from '../users/users.module';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './jwt.strategy';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 // All endpoints are secured by default. Authentication can be disabled with the custom decorator PublicEndpoint.
 // Read: https://docs.nestjs.com/recipes/passport#enable-authentication-globally

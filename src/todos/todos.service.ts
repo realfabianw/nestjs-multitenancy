@@ -1,12 +1,12 @@
 import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
-import { CreateTodoDto } from './entities/dto/create-todo.dto';
-import { UpdateTodoDto } from './entities/dto/update-todo.dto';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../drizzle/schema';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { REQUEST } from '@nestjs/core';
 import { eq } from 'drizzle-orm';
 import { Request } from 'express';
+import { CreateTodoDto } from './dto/create-todo.dto';
+import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodosService {

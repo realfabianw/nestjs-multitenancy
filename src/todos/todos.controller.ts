@@ -8,9 +8,9 @@ import {
   Delete,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
-import { CreateTodoDto } from './entities/dto/create-todo.dto';
-import { UpdateTodoDto } from './entities/dto/update-todo.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateTodoDto } from './dto/update-todo.dto';
+import { CreateTodoDto } from './dto/create-todo.dto';
 
 @ApiTags('Todos')
 @Controller('todos')
