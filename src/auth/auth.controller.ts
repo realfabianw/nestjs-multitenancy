@@ -13,7 +13,10 @@ import { AuthService } from './auth.service';
 import { JwtResponse } from './entities/jwt-response.entity';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
+import LoginDto from './entities/dto/login.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
