@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtAccessTokenPayload } from './entities/jwt-access-token-payload.entity';
 import { User } from '../drizzle/schema';
 import { ConfigService } from '@nestjs/config';
+import { JwtRefreshTokenPayload } from './entities/jwt-refresh-token-payload.entity';
 
 @Injectable()
 export class AuthService {
@@ -38,7 +39,7 @@ export class AuthService {
   }
 
   async createRefreshToken(user: User): Promise<string> {
-    const payload: JwtAccessTokenPayload = {
+    const payload: JwtRefreshTokenPayload = {
       sub: user.id,
       email: user.email,
     };

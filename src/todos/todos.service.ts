@@ -1,4 +1,4 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { CreateTodoDto } from './entities/dto/create-todo.dto';
 import { UpdateTodoDto } from './entities/dto/update-todo.dto';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
@@ -6,10 +6,11 @@ import * as schema from '../drizzle/schema';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { REQUEST } from '@nestjs/core';
 import { eq } from 'drizzle-orm';
+import { Request } from 'express';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodosService {
-  private readonly user: schema.User = this.request['user'];
+  private readonly logger = new Logger(TodosService.name);
 
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
@@ -17,10 +18,11 @@ export class TodosService {
   ) {}
 
   async create(createTodoDto: CreateTodoDto): Promise<schema.Todo> {
+    const user = this.getUser();
     return await this.db
       .insert(schema.todosTable)
       .values({
-        userId: this.user.id,
+        userId: user.id,
         title: createTodoDto.title,
         description: createTodoDto.description,
       })
@@ -29,8 +31,9 @@ export class TodosService {
   }
 
   async findAll(): Promise<schema.Todo[]> {
+    const user = this.getUser();
     return await this.db.query.todosTable.findMany({
-      where: eq(schema.todosTable.userId, this.user.id),
+      where: eq(schema.todosTable.userId, user.id),
     });
   }
 
@@ -57,5 +60,9 @@ export class TodosService {
       .where(eq(schema.todosTable.id, id))
       .returning()
       .then(takeUniqueOrThrow);
+  }
+
+  private getUser(): schema.User {
+    return this.request.user as schema.User;
   }
 }

@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateUserDto } from '../users/entities/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -10,6 +18,9 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import UserResponseDto from '../users/entities/dto/user-response.dto';
 import { Public } from './auth.decorator';
+import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
+import { User } from '../drizzle/schema';
+import { Request } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -53,7 +64,32 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
+    return this.createAuthenticationResponse(response, user);
+  }
 
+  @Public()
+  @UseGuards(JwtRefreshAuthGuard)
+  @Get('refresh')
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user: User = request.user as User;
+    return this.createAuthenticationResponse(response, user);
+  }
+
+  @Public()
+  @Get('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie(this.configService.get<string>('ACCESS_TOKEN_NAME'));
+    response.clearCookie(this.configService.get<string>('REFRESH_TOKEN_NAME'));
+    response.status(200).send();
+  }
+
+  private async createAuthenticationResponse(
+    response: Response,
+    user: User,
+  ): Promise<AuthenticationResponse> {
     const accessToken = await this.authService.createAccessToken(user);
     const refreshToken = await this.authService.createRefreshToken(user);
 
