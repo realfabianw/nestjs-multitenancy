@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { User } from '../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt-payload.entity';
-import { JwtResponse } from './entities/jwt-response.entity';
 
 @Injectable()
 export class AuthService {
@@ -23,15 +22,14 @@ export class AuthService {
       return user;
     }
 
-    return null;
+    throw new UnauthorizedException();
   }
-  async createToken(user: User): Promise<JwtResponse> {
+
+  async createToken(user: User): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
     };
-    return {
-      token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
   }
 }

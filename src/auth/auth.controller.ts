@@ -1,20 +1,14 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { CreateUserDto } from '../users/entities/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
-import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtResponse } from './entities/jwt-response.entity';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import LoginDto from './entities/dto/login.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { User } from '../users/entities/user.entity';
+import { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,40 +20,39 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(
-    @Body() userDto: CreateUserDto,
-    @Res({ passthrough: true }) response,
-  ): Promise<JwtResponse> {
-    const user = await this.usersService.create(userDto);
-    const token = await this.authService.createToken(user);
-
-    response.cookie(
-      this.configService.get<string>('ACCESS_TOKEN_NAME'),
-      token.token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: ms(
-          this.configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
-        ),
-        sameSite: 'strict',
-      },
-    );
-
-    return token;
+  async register(@Body() userDto: CreateUserDto): Promise<User> {
+    return await this.usersService.create(userDto);
   }
 
-  @UseGuards(LocalAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description:
+      "The user has been successfully authenticated. The JWT token is returned in the response's body and set as a cookie in the response's headers.",
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'The user could not be authenticated.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'The request body is malformed.',
+  })
   @Post('login')
   async login(
-    @Request() request,
-    @Res({ passthrough: true }) response,
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<JwtResponse> {
-    const token = await this.authService.createToken(request.user);
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
 
+    const token = await this.authService.createToken(user);
+
+    response.status(200);
     response.cookie(
       this.configService.get<string>('ACCESS_TOKEN_NAME'),
-      token.token,
+      token,
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -70,6 +63,6 @@ export class AuthController {
       },
     );
 
-    return token;
+    return { token };
   }
 }
