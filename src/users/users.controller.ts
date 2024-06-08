@@ -1,9 +1,7 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Controller, Get, Request } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Users')
-@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   @Get('me')

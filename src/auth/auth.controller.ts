@@ -9,6 +9,7 @@ import LoginDto from './entities/dto/login.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import UserResponseDto from '../users/entities/dto/user-response.dto';
+import { Public } from './auth.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,6 +20,7 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  @Public()
   @Post('register')
   async register(@Body() userDto: CreateUserDto): Promise<UserResponseDto> {
     const user = await this.usersService.create(userDto);
@@ -41,6 +43,7 @@ export class AuthController {
     status: 400,
     description: 'The request body is malformed.',
   })
+  @Public()
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
