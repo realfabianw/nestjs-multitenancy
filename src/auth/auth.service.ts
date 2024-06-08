@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from './entities/jwt-payload.entity';
+import { JwtAccessTokenPayload } from './entities/jwt-access-token-payload.entity';
 import { User } from '../drizzle/schema';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly encryptionService: EncryptionService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -25,11 +27,23 @@ export class AuthService {
     throw new UnauthorizedException();
   }
 
-  async createToken(user: User): Promise<string> {
-    const payload: JwtPayload = {
+  async createAccessToken(user: User): Promise<string> {
+    const payload: JwtAccessTokenPayload = {
       sub: user.id,
       email: user.email,
     };
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {
+      expiresIn: this.configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
+    });
+  }
+
+  async createRefreshToken(user: User): Promise<string> {
+    const payload: JwtAccessTokenPayload = {
+      sub: user.id,
+      email: user.email,
+    };
+    return this.jwtService.sign(payload, {
+      expiresIn: this.configService.get<string>('REFRESH_TOKEN_JWT_EXPIRES_IN'),
+    });
   }
 }

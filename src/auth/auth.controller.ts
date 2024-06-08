@@ -2,7 +2,7 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { CreateUserDto } from '../users/entities/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { JwtResponse } from './entities/jwt-response.entity';
+import { AuthenticationResponse } from './entities/authentication-response.entity';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import LoginDto from './entities/dto/login.dto';
@@ -48,28 +48,49 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<JwtResponse> {
+  ): Promise<AuthenticationResponse> {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
     );
 
-    const token = await this.authService.createToken(user);
+    const accessToken = await this.authService.createAccessToken(user);
+    const refreshToken = await this.authService.createRefreshToken(user);
 
     response.status(200);
-    response.cookie(
+
+    this.addCookie(
+      response,
       this.configService.get<string>('ACCESS_TOKEN_NAME'),
-      token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: ms(
-          this.configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
-        ),
-        sameSite: 'strict',
-      },
+      accessToken,
+      this.configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
     );
 
-    return { token };
+    this.addCookie(
+      response,
+      this.configService.get<string>('REFRESH_TOKEN_NAME'),
+      refreshToken,
+      this.configService.get<string>('REFRESH_TOKEN_JWT_EXPIRES_IN'),
+    );
+
+    return {
+      user: { id: user.id, email: user.email },
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
+  }
+
+  private async addCookie(
+    response: Response,
+    name: string,
+    token: string,
+    expiration: string,
+  ) {
+    response.cookie(name, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: ms(expiration),
+      sameSite: 'strict',
+    });
   }
 }

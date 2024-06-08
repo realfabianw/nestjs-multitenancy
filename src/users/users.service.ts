@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './entities/dto/create-user.dto';
 import { UpdateUserDto } from './entities/dto/update-user.dto';
 import { EncryptionService } from '../encryption/encryption.service';
@@ -10,11 +10,13 @@ import { takeUniqueOrThrow } from '../drizzle/extensions';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
     private readonly encryptionService: EncryptionService,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
+    this.logger.log(`Creating user with email: ${createUserDto.email}`);
     return await this.db
       .insert(schema.usersTable)
       .values({

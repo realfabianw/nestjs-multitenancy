@@ -18,9 +18,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
-        },
+        // moved signInOptions to auth.service.ts, as access and refresh tokens use different options.
       }),
     }),
     UsersModule,

@@ -29,14 +29,16 @@ export class TodosService {
   }
 
   async findAll(): Promise<schema.Todo[]> {
-    return await this.db.select().from(schema.todosTable);
+    return await this.db.query.todosTable.findMany({
+      where: eq(schema.todosTable.userId, this.user.id),
+    });
   }
 
   async findOne(id: number): Promise<schema.Todo> {
     return await this.db
       .select()
       .from(schema.todosTable)
-      .where(eq(schema.usersTable.id, id))
+      .where(eq(schema.todosTable.id, id))
       .then(takeUniqueOrThrow);
   }
 
