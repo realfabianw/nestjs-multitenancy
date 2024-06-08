@@ -1,3 +1,11 @@
+# Nest.js Authentication Example
+
+## Drizzle ORM Migrations
+
+Migrations are applied automatically at application startup. To create a new migration, type `npx drizzle-kit generate`. Read more at: https://orm.drizzle.team/docs/migrations#quick-start
+
+# Nest.js README
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>

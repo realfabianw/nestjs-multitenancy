@@ -6,7 +6,7 @@ export default class UserResponseDto {
     required: true,
   })
   @IsNotEmpty()
-  id: string;
+  id: number;
 
   @ApiProperty({
     required: true,

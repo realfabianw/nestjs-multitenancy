@@ -3,10 +3,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { HttpLoggerMiddleware } from './http-logger.middleware';
 import { TodosModule } from './todos/todos.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { envValidationSchema } from './env-validation.schema';
+import { DrizzlePostgresModule } from '@knaadh/nestjs-drizzle-postgres';
+import * as dbSchema from './drizzle/schema';
 
 @Module({
   imports: [
@@ -14,11 +15,17 @@ import { envValidationSchema } from './env-validation.schema';
       validationSchema: envValidationSchema,
       isGlobal: true,
     }),
-    MongooseModule.forRootAsync({
+    DrizzlePostgresModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
+      tag: 'DB_PROD',
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
+        postgres: {
+          url: configService.get<string>('POSTGRES_URL_PROD'),
+        },
+        config: {
+          schema: dbSchema,
+        },
       }),
     }),
     AuthModule,

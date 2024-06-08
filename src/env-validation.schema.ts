@@ -11,5 +11,5 @@ export const envValidationSchema = Joi.object({
   ACCESS_TOKEN_JWT_EXPIRES_IN: Joi.string().required().default('60m'),
   BCRYPT_SALT_ROUNDS: Joi.number().required().default(10),
 
-  MONGO_URI: Joi.string().required(),
+  POSTGRES_URL_PROD: Joi.string().required(),
 });

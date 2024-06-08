@@ -1,41 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './entities/dto/create-user.dto';
 import { UpdateUserDto } from './entities/dto/update-user.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './entities/user.entity';
-import { Model } from 'mongoose';
 import { EncryptionService } from '../encryption/encryption.service';
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import * as schema from '../drizzle/schema';
+import { User } from '../drizzle/schema';
+import { eq } from 'drizzle-orm';
+import { takeUniqueOrThrow } from '../drizzle/extensions';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
     private readonly encryptionService: EncryptionService,
   ) {}
-  async create(createUserDto: CreateUserDto) {
-    return this.userModel.create({
-      email: createUserDto.email,
-      password: await this.encryptionService.hash(createUserDto.password),
-    });
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    return await this.db
+      .insert(schema.usersTable)
+      .values({
+        email: createUserDto.email,
+        password: await this.encryptionService.hash(createUserDto.password),
+      })
+      .returning()
+      .then(takeUniqueOrThrow);
   }
 
-  findAll() {
-    return this.userModel.find().exec();
+  async findAll(): Promise<User[]> {
+    return await this.db.select().from(schema.usersTable);
   }
 
-  findOne(id: number) {
-    return this.userModel.findById(id).exec();
+  async findOne(id: number): Promise<User> {
+    return await this.db
+      .select()
+      .from(schema.usersTable)
+      .where(eq(schema.usersTable.id, id))
+      .then(takeUniqueOrThrow);
   }
 
-  findOneByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+  async findOneByEmail(email: string): Promise<User> {
+    return await this.db
+      .select()
+      .from(schema.usersTable)
+      .where(eq(schema.usersTable.email, email))
+      .then(takeUniqueOrThrow);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userModel.findByIdAndUpdate(id, updateUserDto).exec();
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    return await this.db
+      .update(schema.usersTable)
+      .set(updateUserDto)
+      .where(eq(schema.usersTable.id, id))
+      .returning()
+      .then(takeUniqueOrThrow);
   }
 
-  remove(id: number) {
-    return this.userModel.findByIdAndDelete(id).exec();
+  async remove(id: number): Promise<User> {
+    return await this.db
+      .delete(schema.usersTable)
+      .where(eq(schema.usersTable.id, id))
+      .returning()
+      .then(takeUniqueOrThrow);
   }
 }

@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { EncryptionService } from '../encryption/encryption.service';
-import { User } from '../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt-payload.entity';
+import { User } from '../drizzle/schema';
 
 @Injectable()
 export class AuthService {
