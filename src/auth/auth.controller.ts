@@ -7,8 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import LoginDto from './entities/dto/login.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { User } from '../users/entities/user.entity';
 import { Response } from 'express';
+import UserResponseDto from '../users/entities/dto/user-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -20,8 +20,12 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() userDto: CreateUserDto): Promise<User> {
-    return await this.usersService.create(userDto);
+  async register(@Body() userDto: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.usersService.create(userDto);
+    return {
+      id: user.id,
+      email: user.email,
+    };
   }
 
   @ApiResponse({
