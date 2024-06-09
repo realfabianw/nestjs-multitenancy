@@ -24,6 +24,7 @@ async function bootstrap() {
     const migrationClient = postgres(configService.get('POSTGRES_URL_PROD'));
     migrate(drizzle(migrationClient), {
       migrationsFolder: './drizzle',
+      migrationsSchema: 'application',
       migrationsTable: 'migrations',
     });
     logger.log('Database migrated successfully');

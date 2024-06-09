@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1717873317227,
-      "tag": "0000_spooky_morg",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1717879528707,
-      "tag": "0001_conscious_shinko_yamashiro",
+      "when": 1717967320454,
+      "tag": "0000_outgoing_norrin_radd",
       "breakpoints": true
     }
   ]
