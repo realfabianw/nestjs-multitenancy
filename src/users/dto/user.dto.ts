@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { UserRole } from '../../drizzle/schema';
 
-export default class UserResponseDto {
+export default class UserDto {
   @ApiProperty({
     required: true,
   })
@@ -13,4 +14,5 @@ export default class UserResponseDto {
   })
   @IsNotEmpty()
   email: string;
+  roles: UserRole[];
 }

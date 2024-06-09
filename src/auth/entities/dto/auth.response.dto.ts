@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsJWT, IsNotEmptyObject } from 'class-validator';
-import UserResponseDto from '../../../users/dto/user-response.dto';
+import UserDto from '../../../users/dto/user.dto';
 
 export class AuthResponseDto {
   @ApiProperty({
     required: true,
   })
   @IsNotEmptyObject()
-  user: UserResponseDto;
+  user: UserDto;
   @ApiProperty({
     required: true,
   })

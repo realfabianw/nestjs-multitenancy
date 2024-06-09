@@ -16,7 +16,7 @@ import ms from 'ms';
 import AuthRequestDto from './entities/dto/auth.request.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import UserResponseDto from '../users/dto/user-response.dto';
+import UserDto from '../users/dto/user.dto';
 import { Public } from './auth.decorator';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { User } from '../drizzle/schema';
@@ -33,11 +33,12 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() userDto: CreateUserDto): Promise<UserResponseDto> {
+  async register(@Body() userDto: CreateUserDto): Promise<UserDto> {
     const user = await this.usersService.create(userDto);
     return {
       id: user.id,
       email: user.email,
+      roles: user.roles.map((role) => role.role),
     };
   }
 
@@ -116,7 +117,11 @@ export class AuthController {
     );
 
     return {
-      user: { id: user.id, email: user.email },
+      user: {
+        id: user.id,
+        email: user.email,
+        roles: user.roles.map((role) => role.role),
+      },
       accessToken: accessToken,
       refreshToken: refreshToken,
     };
