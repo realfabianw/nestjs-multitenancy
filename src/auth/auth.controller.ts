@@ -10,10 +10,10 @@ import {
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { AuthenticationResponse } from './entities/dto/authentication-response.dto';
+import { AuthResponseDto } from './entities/dto/auth.response.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
-import LoginDto from './entities/dto/login.dto';
+import AuthRequestDto from './entities/dto/auth.request.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import UserResponseDto from '../users/dto/user-response.dto';
@@ -57,9 +57,9 @@ export class AuthController {
   @Public()
   @Post('login')
   async login(
-    @Body() loginDto: LoginDto,
+    @Body() loginDto: AuthRequestDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<AuthenticationResponse> {
+  ): Promise<AuthResponseDto> {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
@@ -89,9 +89,15 @@ export class AuthController {
   private async createAuthenticationResponse(
     response: Response,
     user: User,
-  ): Promise<AuthenticationResponse> {
-    const accessToken = await this.authService.createAccessToken(user);
-    const refreshToken = await this.authService.createRefreshToken(user);
+  ): Promise<AuthResponseDto> {
+    const accessToken = await this.authService.createToken(
+      user,
+      this.configService.get<string>('ACCESS_TOKEN_JWT_EXPIRES_IN'),
+    );
+    const refreshToken = await this.authService.createToken(
+      user,
+      this.configService.get<string>('REFRESH_TOKEN_JWT_EXPIRES_IN'),
+    );
 
     response.status(200);
 

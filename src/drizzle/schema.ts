@@ -35,7 +35,9 @@ export const userRolesTable = pgTable(
   },
 );
 
-export type UserRole = typeof userRolesTable.$inferSelect;
+export type SelectUserRole = typeof userRolesTable.$inferSelect;
+export type UserRole = typeof userRolesTable.$inferSelect.role;
+
 export const userRolesRelations = relations(userRolesTable, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRolesTable.userId],
@@ -54,7 +56,7 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
   todos: many(todosTable),
 }));
 export type SelectUser = typeof usersTable.$inferSelect;
-export type User = SelectUser & { roles: UserRole[] };
+export type User = SelectUser & { roles: SelectUserRole[] };
 // export type InsertUser = typeof usersTable.$inferInsert;
 
 export const todoStatusEnum = pgEnum('todo_status', [

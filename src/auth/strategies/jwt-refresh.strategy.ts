@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../../users/users.service';
-import { JwtAccessTokenPayload } from '../entities/jwt-access-token-payload.entity';
+import { JwtPayload } from '../entities/jwt-payload';
 import { User } from '../../drizzle/schema';
 
 @Injectable()
@@ -34,11 +34,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: JwtAccessTokenPayload): Promise<User> {
+  async validate(payload: JwtPayload): Promise<User> {
     // Create the user object by cross-referencing the email from the JWT payload with the database.
     // This adds an extra security layer but also requires an additional database query.
     // An alternative approach is to include all required user information in the JWT payload. (Warning: Tokens are valid until expiration, even if the underlying user has been deleted or banned.)
-    const user = await this.usersService.findOneByEmail(payload.email);
+    const user = await this.usersService.findOne(payload.sub);
     if (!user) {
       throw new UnauthorizedException();
     }
