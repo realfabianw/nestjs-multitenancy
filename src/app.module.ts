@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { envValidationSchema } from './env-validation.schema';
 import { DrizzlePostgresModule } from '@knaadh/nestjs-drizzle-postgres';
+import { TenantsModule } from './tenants/tenants.module';
 import * as dbSchema from './drizzle/schema';
 
 @Module({
@@ -30,6 +31,7 @@ import * as dbSchema from './drizzle/schema';
     }),
     AuthModule,
     UsersModule,
+    TenantsModule,
     TodosModule,
   ],
   providers: [AppService],

@@ -30,10 +30,7 @@ export const userRolesTable = pgTable(
 );
 
 export const userRolesRelations = relations(userRolesTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [userRolesTable.userId],
-    references: [usersTable.id],
-  }),
+  user: one(usersTable),
 }));
 
 export type SelectUserRole = typeof userRolesTable.$inferSelect;
@@ -48,9 +45,38 @@ export const usersTable = pgTable('users', {
 export const usersRelations = relations(usersTable, ({ many }) => ({
   roles: many(userRolesTable),
   todos: many(todosTable),
+  tenants: many(tenantUsersTable),
 }));
 export type SelectUser = typeof usersTable.$inferSelect;
 export type User = SelectUser & { roles: SelectUserRole[] };
+
+// TENANTS
+
+export const tenantsTable = pgTable('tenants', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+});
+
+export const tenantsRelations = relations(tenantsTable, ({ many }) => ({
+  users: many(tenantUsersTable),
+}));
+
+export const tenantUsersTable = pgTable('tenants_users', {
+  tenantId: integer('tenant_id')
+    .references(() => tenantsTable.id, { onDelete: 'cascade' })
+    .notNull(),
+  userId: integer('user_id')
+    .references(() => usersTable.id, { onDelete: 'cascade' })
+    .notNull(),
+});
+
+export const tenantUsersRelations = relations(tenantUsersTable, ({ one }) => ({
+  tenant: one(tenantsTable),
+  user: one(usersTable),
+}));
+
+// TODOS
 
 export const todoStatusEnum = pgEnum('todo_status', [
   'OPEN',
