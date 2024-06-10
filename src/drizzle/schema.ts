@@ -14,12 +14,6 @@ export const userRolesEnum = pgEnum('user_roles', [
   'USER',
 ]);
 
-// export enum UserRole {
-//   SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-//   TENANT_ADMIN = 'TENANT_ADMIN',
-//   USER = 'USER',
-// }
-
 export const userRolesTable = pgTable(
   'users_roles',
   {
@@ -35,15 +29,15 @@ export const userRolesTable = pgTable(
   },
 );
 
-export type SelectUserRole = typeof userRolesTable.$inferSelect;
-export type UserRole = typeof userRolesTable.$inferSelect.role;
-
 export const userRolesRelations = relations(userRolesTable, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRolesTable.userId],
     references: [usersTable.id],
   }),
 }));
+
+export type SelectUserRole = typeof userRolesTable.$inferSelect;
+export type UserRole = typeof userRolesTable.$inferSelect.role; // Using this type as enum
 
 export const usersTable = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -57,19 +51,12 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
 }));
 export type SelectUser = typeof usersTable.$inferSelect;
 export type User = SelectUser & { roles: SelectUserRole[] };
-// export type InsertUser = typeof usersTable.$inferInsert;
 
 export const todoStatusEnum = pgEnum('todo_status', [
   'OPEN',
   'IN_PROGRESS',
   'DONE',
 ]);
-
-export enum TodoStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  DONE = 'DONE',
-}
 
 export const todosTable = pgTable('todos', {
   id: serial('id').primaryKey(),
@@ -78,7 +65,7 @@ export const todosTable = pgTable('todos', {
     .notNull(),
   title: text('title').notNull(),
   description: text('description'),
-  status: todoStatusEnum('status').notNull().default(TodoStatus.OPEN),
+  status: todoStatusEnum('status').notNull().default('OPEN'),
 });
 
 export const todosRelations = relations(todosTable, ({ one }) => ({
@@ -86,4 +73,4 @@ export const todosRelations = relations(todosTable, ({ one }) => ({
 }));
 
 export type Todo = typeof todosTable.$inferSelect;
-// export type InsertTodo = typeof todosTable.$inferInsert;
+export type TodoStatus = typeof todosTable.$inferSelect.status; // Using this type as enum
