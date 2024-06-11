@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { Request } from 'express';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { SelectTodo, User } from '../drizzle/schema';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodosService {
@@ -17,8 +18,8 @@ export class TodosService {
     @Inject(REQUEST) private request: Request,
   ) {}
 
-  async create(createTodoDto: CreateTodoDto): Promise<schema.Todo> {
-    const user = this.getUser();
+  async create(createTodoDto: CreateTodoDto): Promise<SelectTodo> {
+    const user = this.request.user as User;
     return await this.db
       .insert(schema.todosTable)
       .values({
@@ -30,14 +31,14 @@ export class TodosService {
       .then(takeUniqueOrThrow);
   }
 
-  async findAll(): Promise<schema.Todo[]> {
-    const user = this.getUser();
+  async findAll(): Promise<SelectTodo[]> {
+    const user = this.request.user as User;
     return await this.db.query.todosTable.findMany({
       where: eq(schema.todosTable.userId, user.id),
     });
   }
 
-  async findOne(id: number): Promise<schema.Todo> {
+  async findOne(id: number): Promise<SelectTodo> {
     return await this.db
       .select()
       .from(schema.todosTable)
@@ -45,7 +46,7 @@ export class TodosService {
       .then(takeUniqueOrThrow);
   }
 
-  async update(id: number, updateTodoDto: UpdateTodoDto): Promise<schema.Todo> {
+  async update(id: number, updateTodoDto: UpdateTodoDto): Promise<SelectTodo> {
     return await this.db
       .update(schema.todosTable)
       .set(updateTodoDto)
@@ -54,15 +55,11 @@ export class TodosService {
       .then(takeUniqueOrThrow);
   }
 
-  async remove(id: number): Promise<schema.Todo> {
+  async remove(id: number): Promise<SelectTodo> {
     return await this.db
       .delete(schema.todosTable)
       .where(eq(schema.todosTable.id, id))
       .returning()
       .then(takeUniqueOrThrow);
-  }
-
-  private getUser(): schema.User {
-    return this.request.user as schema.User;
   }
 }

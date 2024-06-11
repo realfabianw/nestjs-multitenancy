@@ -30,17 +30,20 @@ export class UsersService {
       userId: user.id,
     });
 
-    const response = await this.db.query.usersTable.findFirst({
-      where: eq(schema.usersTable.id, user.id),
-      with: {
-        roles: true,
-      },
-    });
-    return response;
+    return await this.findOne(user.id);
   }
 
   async findAll(): Promise<User[]> {
-    return await this.db.query.usersTable.findMany({ with: { roles: true } });
+    return await this.db.query.usersTable.findMany({
+      with: {
+        roles: true,
+        tenantUsers: {
+          with: {
+            roles: true,
+          },
+        },
+      },
+    });
   }
 
   async findOne(id: number): Promise<User> {
@@ -48,17 +51,28 @@ export class UsersService {
       where: eq(schema.usersTable.id, id),
       with: {
         roles: true,
+        tenantUsers: {
+          with: {
+            roles: true,
+          },
+        },
       },
     });
   }
 
   async findOneByEmail(email: string): Promise<User> {
-    return await this.db.query.usersTable.findFirst({
+    const user = await this.db.query.usersTable.findFirst({
       where: eq(schema.usersTable.email, email),
       with: {
         roles: true,
+        tenantUsers: {
+          with: {
+            roles: true,
+          },
+        },
       },
     });
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -67,12 +81,7 @@ export class UsersService {
       .set(updateUserDto)
       .where(eq(schema.usersTable.id, id));
 
-    return await this.db.query.usersTable.findFirst({
-      where: eq(schema.usersTable.id, id),
-      with: {
-        roles: true,
-      },
-    });
+    return await this.findOne(id);
   }
 
   async remove(id: number): Promise<SelectUser> {
@@ -83,3 +92,31 @@ export class UsersService {
       .then(takeUniqueOrThrow);
   }
 }
+
+/**
+ * 
+Type '{ id: number; email: string; password: string; roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }' is not assignable to type 'User'.
+
+
+Type 
+  '{ id: number; email: string; password: string; roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }'
+is not assignable to type
+  '{ roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; } & { roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }'.
+
+
+  Types of property 'tenants' are incompatible.
+Type 
+
+'{ userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'
+is not assignable to type
+'{ userId: number; tenantUserId: number; tenantId: number; } & { roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'.
+
+
+
+Type
+'{ userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'
+is missing the following properties from type
+'{ userId: number; tenantUserId: number; tenantId: number; }': userId, tenantUserId, tenantIdts(2322)
+ * 
+ * 
+ */

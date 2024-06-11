@@ -74,7 +74,7 @@ export class AuthController {
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<AuthResponseDto> {
     const user: User = request.user as User;
     return this.createAuthenticationResponse(response, user);
   }

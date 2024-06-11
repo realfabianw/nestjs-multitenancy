@@ -11,6 +11,7 @@ import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantDto } from './dto/tenant.dto';
+import { TenantRoles } from '../auth/decorators/authorization.decorator';
 
 @Controller('tenants')
 export class TenantsController {
@@ -22,7 +23,7 @@ export class TenantsController {
   }
 
   @Get()
-  async findAll(): Promise<TenantDto> {
+  async findAll(): Promise<TenantDto[]> {
     return this.tenantsService.findAll();
   }
 
@@ -31,6 +32,7 @@ export class TenantsController {
     return this.tenantsService.findOne(+id);
   }
 
+  @TenantRoles('ADMIN')
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -39,6 +41,7 @@ export class TenantsController {
     return this.tenantsService.update(+id, updateTenantDto);
   }
 
+  @TenantRoles('ADMIN')
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<TenantDto> {
     return this.tenantsService.remove(+id);

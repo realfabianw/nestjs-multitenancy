@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class TenantDto {
+export class TodoDto {
   @ApiProperty({
     required: true,
     example: 1,
@@ -10,13 +10,13 @@ export class TenantDto {
   id: number;
   @ApiProperty({
     required: true,
-    example: 'My Company',
+    example: 'My Todo',
   })
   @IsNotEmpty()
-  name: string;
+  title: string;
   @ApiProperty({
     required: true,
-    example: 'A description of my company',
+    example: 'A description of my todo',
   })
   @IsNotEmpty()
   description: string;

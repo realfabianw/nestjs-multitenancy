@@ -1,9 +1,130 @@
 {
-  "id": "eaf92631-6553-4b26-b6f6-2e01b3161346",
+  "id": "03a2ea3d-59ac-4a12-98a1-ea4227c2b64d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.tenants_user_roles": {
+      "name": "tenants_user_roles",
+      "schema": "",
+      "columns": {
+        "tenant_user_id": {
+          "name": "tenant_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "tenant_user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'USER'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenants_user_roles_tenant_user_id_tenants_users_tenant_user_id_fk": {
+          "name": "tenants_user_roles_tenant_user_id_tenants_users_tenant_user_id_fk",
+          "tableFrom": "tenants_user_roles",
+          "tableTo": "tenants_users",
+          "columnsFrom": [
+            "tenant_user_id"
+          ],
+          "columnsTo": [
+            "tenant_user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.tenants_users": {
+      "name": "tenants_users",
+      "schema": "",
+      "columns": {
+        "tenant_user_id": {
+          "name": "tenant_user_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenants_users_tenant_id_tenants_id_fk": {
+          "name": "tenants_users_tenant_id_tenants_id_fk",
+          "tableFrom": "tenants_users",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tenants_users_user_id_users_id_fk": {
+          "name": "tenants_users_user_id_users_id_fk",
+          "tableFrom": "tenants_users",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.tenants": {
+      "name": "tenants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.todos": {
       "name": "todos",
       "schema": "",
@@ -64,6 +185,12 @@
       "name": "users_roles",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
@@ -72,7 +199,7 @@
         },
         "role": {
           "name": "role",
-          "type": "user_roles",
+          "type": "user_role",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -95,15 +222,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "users_roles_user_id_role_pk": {
-          "name": "users_roles_user_id_role_pk",
-          "columns": [
-            "user_id",
-            "role"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.users": {
@@ -144,6 +263,14 @@
     }
   },
   "enums": {
+    "public.tenant_user_role": {
+      "name": "tenant_user_role",
+      "schema": "public",
+      "values": [
+        "ADMIN",
+        "USER"
+      ]
+    },
     "public.todo_status": {
       "name": "todo_status",
       "schema": "public",
@@ -153,12 +280,11 @@
         "DONE"
       ]
     },
-    "public.user_roles": {
-      "name": "user_roles",
+    "public.user_role": {
+      "name": "user_role",
       "schema": "public",
       "values": [
-        "SYSTEM_ADMIN",
-        "TENANT_ADMIN",
+        "ADMIN",
         "USER"
       ]
     }

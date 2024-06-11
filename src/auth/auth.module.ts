@@ -8,7 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/authorization.guards';
+import { RolesGuard } from './guards/roles.guards';
+import { TenantRolesGuard } from './guards/tenant-roles.guards';
 
 // All endpoints are secured by default. Authentication can be disabled with the custom decorator PublicEndpoint.
 // Read: https://docs.nestjs.com/recipes/passport#enable-authentication-globally
@@ -33,6 +34,7 @@ import { RolesGuard } from './guards/authorization.guards';
     JwtRefreshStrategy,
     { provide: 'APP_GUARD', useClass: JwtAuthGuard },
     { provide: 'APP_GUARD', useClass: RolesGuard },
+    { provide: 'APP_GUARD', useClass: TenantRolesGuard },
   ],
 })
 export class AuthModule {}

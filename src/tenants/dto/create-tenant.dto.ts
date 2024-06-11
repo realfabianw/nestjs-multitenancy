@@ -1,1 +1,4 @@
-export class CreateTenantDto {}
+export class CreateTenantDto {
+  name: string;
+  description: string;
+}

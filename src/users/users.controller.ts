@@ -15,6 +15,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '../auth/decorators/authorization.decorator';
+import { DeleteUserResponseDto } from './dto/delete-user.response.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -28,7 +29,7 @@ export class UsersController {
    * @param userDto
    * @returns
    */
-  @Roles('SYSTEM_ADMIN', 'TENANT_ADMIN')
+  @Roles('ADMIN')
   @Post()
   async create(@Body() userDto: CreateUserDto): Promise<UserDto> {
     const user = await this.usersService.create(userDto);
@@ -39,7 +40,6 @@ export class UsersController {
     };
   }
 
-  @Roles('SYSTEM_ADMIN', 'TENANT_ADMIN')
   @Get('me')
   async findAuthenticatedUser(@Request() request): Promise<UserDto> {
     const user: User = request.user;
@@ -84,7 +84,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.usersService.remove(+id);
+  async remove(@Param('id') id: string): Promise<DeleteUserResponseDto> {
+    const deletedUser = await this.usersService.remove(+id);
+    return {
+      id: deletedUser.id,
+      email: deletedUser.email,
+    };
   }
 }
