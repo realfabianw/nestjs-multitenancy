@@ -1,24 +1,18 @@
 DO $$ BEGIN
- CREATE TYPE "public"."tenant_user_role" AS ENUM('ADMIN', 'USER');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  CREATE TYPE "public"."todo_status" AS ENUM('OPEN', 'IN_PROGRESS', 'DONE');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."user_role" AS ENUM('ADMIN', 'USER');
+ CREATE TYPE "public"."user_role" AS ENUM('SYSTEM_ADMIN', 'SYSTEM_USER', 'TENANT_ADMIN', 'TENANT_USER');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "tenants_user_roles" (
 	"tenant_user_id" integer NOT NULL,
-	"role" "tenant_user_role" DEFAULT 'USER' NOT NULL
+	"role" "user_role" DEFAULT 'TENANT_USER' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "tenants_users" (
@@ -44,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "todos" (
 CREATE TABLE IF NOT EXISTS "users_roles" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
-	"role" "user_role" DEFAULT 'USER' NOT NULL
+	"role" "user_role" DEFAULT 'SYSTEM_USER' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (

@@ -15,6 +15,7 @@ export class UsersService {
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
     private readonly encryptionService: EncryptionService,
   ) {}
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user with email: ${createUserDto.email}`);
     const user: SelectUser = await this.db

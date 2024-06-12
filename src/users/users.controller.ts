@@ -7,6 +7,7 @@ import {
   Post,
   Request,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import UserDto from './dto/user.dto';
@@ -14,8 +15,10 @@ import { User } from '../drizzle/schema';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Roles } from '../auth/decorators/authorization.decorator';
+import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { DeleteUserResponseDto } from './dto/delete-user.response.dto';
+import { Permission } from '../auth/entities/permissions.enum';
+import { Response } from 'express';
 
 @ApiTags('Users')
 @Controller('users')
@@ -29,7 +32,7 @@ export class UsersController {
    * @param userDto
    * @returns
    */
-  @Roles('ADMIN')
+  @RequiresPermissions(Permission.create_all)
   @Post()
   async create(@Body() userDto: CreateUserDto): Promise<UserDto> {
     const user = await this.usersService.create(userDto);
@@ -50,6 +53,7 @@ export class UsersController {
     };
   }
 
+  @RequiresPermissions(Permission.read_all)
   @Get()
   async findAll(): Promise<UserDto[]> {
     const users = await this.usersService.findAll();
@@ -60,16 +64,23 @@ export class UsersController {
     }));
   }
 
+  @RequiresPermissions(Permission.read_self)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserDto> {
+  async findOne(@Param('id') id: string, @Res() response: Response) {
     const user: User = await this.usersService.findOne(+id);
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-    };
+
+    if (!user) {
+      response.status(404).json({ message: 'User not found' });
+    } else {
+      response.status(200).json({
+        id: user.id,
+        email: user.email,
+        roles: user.roles.map((role) => role.role),
+      });
+    }
   }
 
+  @RequiresPermissions(Permission.update_self)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -83,6 +94,7 @@ export class UsersController {
     };
   }
 
+  @RequiresPermissions(Permission.delete_self)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<DeleteUserResponseDto> {
     const deletedUser = await this.usersService.remove(+id);

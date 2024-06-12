@@ -22,7 +22,7 @@ async function bootstrap() {
   // Database Migration
   try {
     const migrationClient = postgres(configService.get('POSTGRES_URL_PROD'));
-    migrate(drizzle(migrationClient), {
+    await migrate(drizzle(migrationClient), {
       migrationsFolder: './drizzle',
       migrationsSchema: 'public',
       migrationsTable: 'migrations',

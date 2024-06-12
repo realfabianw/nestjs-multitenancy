@@ -39,7 +39,7 @@ export class TenantsService {
       .insert(schema.tenantUserRolesTable)
       .values({
         tenantUserId: tenantUser.tenantUserId,
-        role: 'ADMIN',
+        role: 'TENANT_ADMIN',
       })
       .returning()
       .then(takeUniqueOrThrow);

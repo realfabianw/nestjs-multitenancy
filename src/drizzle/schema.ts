@@ -3,14 +3,19 @@ import { integer, pgEnum, pgTable, serial, text } from 'drizzle-orm/pg-core';
 
 // User Roles
 
-export const userRolesEnum = pgEnum('user_role', ['ADMIN', 'USER']);
+export const userRolesEnum = pgEnum('user_role', [
+  'SYSTEM_ADMIN',
+  'SYSTEM_USER',
+  'TENANT_ADMIN',
+  'TENANT_USER',
+]);
 
 export const userRolesTable = pgTable('users_roles', {
   id: serial('id').primaryKey(),
   userId: integer('user_id')
     .references(() => usersTable.id, { onDelete: 'cascade' })
     .notNull(),
-  role: userRolesEnum('role').notNull().default('USER'),
+  role: userRolesEnum('role').notNull().default('SYSTEM_USER'),
 });
 
 export const userRolesRelations = relations(userRolesTable, ({ one }) => ({
@@ -91,16 +96,11 @@ export type TenantUserWithRoles = SelectTenantUser & {
 
 // Tenant User Roles
 
-export const tenantUserRolesEnum = pgEnum('tenant_user_role', [
-  'ADMIN',
-  'USER',
-]);
-
 export const tenantUserRolesTable = pgTable('tenants_user_roles', {
   tenantUserId: integer('tenant_user_id')
     .notNull()
     .references(() => tenantUsersTable.tenantUserId, { onDelete: 'cascade' }),
-  role: tenantUserRolesEnum('role').notNull().default('USER'),
+  role: userRolesEnum('role').notNull().default('TENANT_USER'),
 });
 
 export const tenantUserRolesRelations = relations(
@@ -114,8 +114,6 @@ export const tenantUserRolesRelations = relations(
 );
 
 export type SelectTenantUserRole = typeof tenantUserRolesTable.$inferSelect;
-export type TenantUserRole = typeof tenantUserRolesTable.$inferSelect.role; // Using this type as enum
-
 // Todos
 
 export const todoStatusEnum = pgEnum('todo_status', [

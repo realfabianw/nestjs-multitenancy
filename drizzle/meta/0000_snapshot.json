@@ -1,5 +1,5 @@
 {
-  "id": "03a2ea3d-59ac-4a12-98a1-ea4227c2b64d",
+  "id": "95eed6bb-4585-4872-a35a-5bd745c149f0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -16,11 +16,11 @@
         },
         "role": {
           "name": "role",
-          "type": "tenant_user_role",
+          "type": "user_role",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'USER'"
+          "default": "'TENANT_USER'"
         }
       },
       "indexes": {},
@@ -203,7 +203,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'USER'"
+          "default": "'SYSTEM_USER'"
         }
       },
       "indexes": {},
@@ -263,14 +263,6 @@
     }
   },
   "enums": {
-    "public.tenant_user_role": {
-      "name": "tenant_user_role",
-      "schema": "public",
-      "values": [
-        "ADMIN",
-        "USER"
-      ]
-    },
     "public.todo_status": {
       "name": "todo_status",
       "schema": "public",
@@ -284,8 +276,10 @@
       "name": "user_role",
       "schema": "public",
       "values": [
-        "ADMIN",
-        "USER"
+        "SYSTEM_ADMIN",
+        "SYSTEM_USER",
+        "TENANT_ADMIN",
+        "TENANT_USER"
       ]
     }
   },
