@@ -5,14 +5,18 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../drizzle/schema';
 import { SelectUser, User } from '../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
+import { InviteUserDto } from './dto/invite-user.dto';
+import { Request } from 'express';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
+    @Inject(REQUEST) private request: Request,
     private readonly encryptionService: EncryptionService,
   ) {}
 
@@ -34,31 +38,101 @@ export class UsersService {
     return await this.findOne(user.id);
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.db.query.usersTable.findMany({
-      with: {
-        roles: true,
-        tenantUsers: {
-          with: {
-            roles: true,
-          },
-        },
-      },
+  async invite(inviteUserDto: InviteUserDto, tenantId?: number) {
+    // TODO: Send invitation email. For now, create user with a default password
+    const userToInvite: User = await this.create({
+      email: inviteUserDto.email,
+      password: 'MySecurePassword123!',
     });
+
+    if (tenantId) {
+      // Add the new user to the tenant
+      const tenantUser = await this.db
+        .insert(schema.tenantUsersTable)
+        .values({
+          tenantId: tenantId,
+          userId: userToInvite.id,
+        })
+        .returning()
+        .then(takeUniqueOrThrow);
+
+      await this.db.insert(schema.tenantUserRolesTable).values({
+        tenantUserId: tenantUser.tenantUserId,
+        role: 'TENANT_USER',
+      });
+    }
   }
 
-  async findOne(id: number): Promise<User> {
-    return await this.db.query.usersTable.findFirst({
-      where: eq(schema.usersTable.id, id),
-      with: {
-        roles: true,
-        tenantUsers: {
-          with: {
-            roles: true,
+  async findAll(tenantId?: number): Promise<User[]> {
+    if (tenantId) {
+      return await this.db.query.usersTable.findMany({
+        with: {
+          roles: true,
+          tenantUsers: {
+            with: {
+              roles: true,
+            },
           },
         },
-      },
-    });
+      });
+    } else {
+      const entries = await this.db.query.tenantUsersTable.findMany({
+        where: eq(schema.tenantUsersTable.tenantId, tenantId),
+        with: {
+          user: {
+            with: {
+              roles: true,
+              tenantUsers: {
+                where: eq(schema.tenantUsersTable.tenantId, tenantId),
+                with: {
+                  roles: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return entries.map((entry) => entry.user);
+    }
+  }
+
+  async findOne(id: number, tenantId?: number): Promise<User> {
+    if (tenantId) {
+      return await this.db.query.usersTable.findFirst({
+        where: eq(schema.usersTable.id, id),
+        with: {
+          roles: true,
+          tenantUsers: {
+            with: {
+              roles: true,
+            },
+          },
+        },
+      });
+    } else {
+      const entry = await this.db.query.tenantUsersTable.findFirst({
+        where: and(
+          eq(schema.tenantUsersTable.tenantId, tenantId),
+          eq(schema.tenantUsersTable.userId, id),
+        ),
+        with: {
+          user: {
+            with: {
+              roles: true,
+              tenantUsers: {
+                where: eq(schema.tenantUsersTable.tenantId, tenantId),
+                with: {
+                  roles: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return entry.user;
+    }
   }
 
   async findOneByEmail(email: string): Promise<User> {
@@ -85,12 +159,21 @@ export class UsersService {
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<SelectUser> {
-    return await this.db
-      .delete(schema.usersTable)
-      .where(eq(schema.usersTable.id, id))
-      .returning()
-      .then(takeUniqueOrThrow);
+  async remove(id: number, tenantId?: number) {
+    if (tenantId) {
+      await this.db
+        .delete(schema.usersTable)
+        .where(eq(schema.usersTable.id, id));
+    } else {
+      await this.db
+        .delete(schema.tenantUsersTable)
+        .where(
+          and(
+            eq(schema.tenantUsersTable.tenantId, tenantId),
+            eq(schema.tenantUsersTable.userId, id),
+          ),
+        );
+    }
   }
 }
 

@@ -13,7 +13,9 @@ import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantDto } from './dto/tenant.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Tenants')
 @Controller('tenants')
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
@@ -23,7 +25,7 @@ export class TenantsController {
     return this.tenantsService.create(createTenantDto);
   }
 
-  @RequiresPermissions(Permission.tenant_read_self)
+  @RequiresPermissions(Permission.tenant_read_all)
   @Get()
   async findAll(): Promise<TenantDto[]> {
     return this.tenantsService.findAll();

@@ -13,17 +13,20 @@ import { ApiTags } from '@nestjs/swagger';
 import UserDto from './dto/user.dto';
 import { User } from '../drizzle/schema';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
-import { DeleteUserResponseDto } from './dto/delete-user.response.dto';
 import { Permission } from '../auth/entities/permissions.enum';
 import { Response } from 'express';
+import { TenantProvider } from '../auth/tenant.provider';
+import { InviteUserDto } from './dto/invite-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly tenantProvider: TenantProvider,
+  ) {}
 
   /**
    * TODO: This function is currently similar to auth/register.
@@ -32,15 +35,13 @@ export class UsersController {
    * @param userDto
    * @returns
    */
-  @RequiresPermissions(Permission.create_all)
+  @RequiresPermissions(Permission.create_all, Permission.tenant_create_self)
   @Post()
-  async create(@Body() userDto: CreateUserDto): Promise<UserDto> {
-    const user = await this.usersService.create(userDto);
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-    };
+  async invite(@Body() inviteUserDto: InviteUserDto) {
+    await this.usersService.invite(
+      inviteUserDto,
+      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+    );
   }
 
   @Get('me')
@@ -53,10 +54,12 @@ export class UsersController {
     };
   }
 
-  @RequiresPermissions(Permission.read_all)
+  @RequiresPermissions(Permission.read_all, Permission.tenant_read_all)
   @Get()
   async findAll(): Promise<UserDto[]> {
-    const users = await this.usersService.findAll();
+    const users = await this.usersService.findAll(
+      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+    );
     return users.map((user) => ({
       id: user.id,
       email: user.email,
@@ -64,10 +67,13 @@ export class UsersController {
     }));
   }
 
-  @RequiresPermissions(Permission.read_self)
+  @RequiresPermissions(Permission.read_self, Permission.tenant_read_self)
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() response: Response) {
-    const user: User = await this.usersService.findOne(+id);
+    const user: User = await this.usersService.findOne(
+      +id,
+      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+    );
 
     if (!user) {
       response.status(404).json({ message: 'User not found' });
@@ -94,13 +100,12 @@ export class UsersController {
     };
   }
 
-  @RequiresPermissions(Permission.delete_self)
+  @RequiresPermissions(Permission.delete_self, Permission.tenant_delete_self)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<DeleteUserResponseDto> {
-    const deletedUser = await this.usersService.remove(+id);
-    return {
-      id: deletedUser.id,
-      email: deletedUser.email,
-    };
+  async remove(@Param('id') id: string) {
+    await this.usersService.remove(
+      +id,
+      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+    );
   }
 }

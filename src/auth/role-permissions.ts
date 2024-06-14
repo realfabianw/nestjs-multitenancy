@@ -9,7 +9,7 @@ export interface RolePermission {
 export const rolePermissions: RolePermission[] = [
   {
     role: 'SYSTEM_ADMIN',
-    permissions: [Permission.manage_all],
+    permissions: [Permission.manage_all, Permission.tenant_manage_all],
   },
   {
     role: 'SYSTEM_USER',
