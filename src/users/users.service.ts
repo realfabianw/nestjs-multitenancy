@@ -8,15 +8,17 @@ import { SelectUser, User } from '../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { InviteUserDto } from './dto/invite-user.dto';
-import { Request } from 'express';
-import { REQUEST } from '@nestjs/core';
 
+/**
+ * It seems that every service that is related to Passport and its JWT authentication strategy is not
+ * permitted to be injected at request scope. The JWT authentication fails when this service is request-scoped,
+ * as it is currently used in JwtStrategy.ts. Read more: https://github.com/nestjs/nest/issues/1870
+ */
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
-    @Inject(REQUEST) private request: Request,
     private readonly encryptionService: EncryptionService,
   ) {}
 

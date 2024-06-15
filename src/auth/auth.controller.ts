@@ -39,6 +39,10 @@ export class AuthController {
       id: user.id,
       email: user.email,
       roles: user.roles.map((role) => role.role),
+      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+        tenantId: tenantUser.tenantId,
+        roles: tenantUser.roles.map((role) => role.role),
+      })),
     };
   }
 
@@ -121,6 +125,10 @@ export class AuthController {
         id: user.id,
         email: user.email,
         roles: user.roles.map((role) => role.role),
+        tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+          tenantId: tenantUser.tenantId,
+          roles: tenantUser.roles.map((role) => role.role),
+        })),
       },
       accessToken: accessToken,
       refreshToken: refreshToken,

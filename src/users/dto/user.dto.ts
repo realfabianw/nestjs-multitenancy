@@ -14,5 +14,16 @@ export default class UserDto {
   })
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNotEmpty()
   roles: UserRole[];
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNotEmpty()
+  tenantMemberships: { tenantId: number; roles: UserRole[] }[];
 }

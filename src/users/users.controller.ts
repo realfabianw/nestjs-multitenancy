@@ -51,6 +51,10 @@ export class UsersController {
       id: user.id,
       email: user.email,
       roles: user.roles.map((role) => role.role),
+      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+        tenantId: tenantUser.tenantId,
+        roles: tenantUser.roles.map((role) => role.role),
+      })),
     };
   }
 
@@ -64,6 +68,10 @@ export class UsersController {
       id: user.id,
       email: user.email,
       roles: user.roles.map((role) => role.role),
+      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+        tenantId: tenantUser.tenantId,
+        roles: tenantUser.roles.map((role) => role.role),
+      })),
     }));
   }
 
@@ -82,6 +90,10 @@ export class UsersController {
         id: user.id,
         email: user.email,
         roles: user.roles.map((role) => role.role),
+        tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+          tenantId: tenantUser.tenantId,
+          roles: tenantUser.roles.map((role) => role.role),
+        })),
       });
     }
   }
@@ -97,6 +109,10 @@ export class UsersController {
       id: user.id,
       email: user.email,
       roles: user.roles.map((role) => role.role),
+      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
+        tenantId: tenantUser.tenantId,
+        roles: tenantUser.roles.map((role) => role.role),
+      })),
     };
   }
 
