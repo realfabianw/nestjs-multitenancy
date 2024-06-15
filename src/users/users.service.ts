@@ -65,17 +65,6 @@ export class UsersService {
 
   async findAll(tenantId?: number): Promise<User[]> {
     if (tenantId) {
-      return await this.db.query.usersTable.findMany({
-        with: {
-          roles: true,
-          tenantUsers: {
-            with: {
-              roles: true,
-            },
-          },
-        },
-      });
-    } else {
       const entries = await this.db.query.tenantUsersTable.findMany({
         where: eq(schema.tenantUsersTable.tenantId, tenantId),
         with: {
@@ -94,13 +83,8 @@ export class UsersService {
       });
 
       return entries.map((entry) => entry.user);
-    }
-  }
-
-  async findOne(id: number, tenantId?: number): Promise<User> {
-    if (tenantId) {
-      return await this.db.query.usersTable.findFirst({
-        where: eq(schema.usersTable.id, id),
+    } else {
+      return await this.db.query.usersTable.findMany({
         with: {
           roles: true,
           tenantUsers: {
@@ -110,7 +94,11 @@ export class UsersService {
           },
         },
       });
-    } else {
+    }
+  }
+
+  async findOne(id: number, tenantId?: number): Promise<User> {
+    if (tenantId) {
       const entry = await this.db.query.tenantUsersTable.findFirst({
         where: and(
           eq(schema.tenantUsersTable.tenantId, tenantId),
@@ -132,6 +120,18 @@ export class UsersService {
       });
 
       return entry.user;
+    } else {
+      return await this.db.query.usersTable.findFirst({
+        where: eq(schema.usersTable.id, id),
+        with: {
+          roles: true,
+          tenantUsers: {
+            with: {
+              roles: true,
+            },
+          },
+        },
+      });
     }
   }
 
@@ -162,10 +162,6 @@ export class UsersService {
   async remove(id: number, tenantId?: number) {
     if (tenantId) {
       await this.db
-        .delete(schema.usersTable)
-        .where(eq(schema.usersTable.id, id));
-    } else {
-      await this.db
         .delete(schema.tenantUsersTable)
         .where(
           and(
@@ -173,6 +169,10 @@ export class UsersService {
             eq(schema.tenantUsersTable.userId, id),
           ),
         );
+    } else {
+      await this.db
+        .delete(schema.usersTable)
+        .where(eq(schema.usersTable.id, id));
     }
   }
 }

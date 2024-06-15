@@ -58,6 +58,7 @@ export const tenantsTable = pgTable('tenants', {
 
 export const tenantsRelations = relations(tenantsTable, ({ many }) => ({
   tenantUsers: many(tenantUsersTable),
+  todos: many(todosTable),
 }));
 
 export type SelectTenant = typeof tenantsTable.$inferSelect;
@@ -124,6 +125,9 @@ export const todoStatusEnum = pgEnum('todo_status', [
 
 export const todosTable = pgTable('todos', {
   id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenantsTable.id, {
+    onDelete: 'cascade',
+  }),
   userId: integer('user_id')
     .references(() => usersTable.id, { onDelete: 'cascade' })
     .notNull(),
@@ -133,6 +137,7 @@ export const todosTable = pgTable('todos', {
 });
 
 export const todosRelations = relations(todosTable, ({ one }) => ({
+  tenant: one(tenantsTable),
   user: one(usersTable),
 }));
 
