@@ -1,5 +1,9 @@
 # Nest.js Authentication Example
 
+This project showcases a simple implementation of a multitenancy architecture using row isolation.
+
+**Disclaimer**: Not all endpoints are properly tested and i can't recommend using this project without implementing tests.
+
 ## Drizzle ORM Migrations
 
 Migrations are applied automatically at application startup. To create a new migration, type `npx drizzle-kit generate`. Read more at: https://orm.drizzle.team/docs/migrations#quick-start
