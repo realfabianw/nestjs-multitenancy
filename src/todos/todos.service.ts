@@ -1,9 +1,9 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../drizzle/schema';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { REQUEST } from '@nestjs/core';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { Request } from 'express';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
@@ -11,8 +11,6 @@ import { SelectTodo, User } from '../drizzle/schema';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TodosService {
-  private readonly logger = new Logger(TodosService.name);
-
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
     @Inject(REQUEST) private request: Request,
@@ -47,7 +45,10 @@ export class TodosService {
       });
     } else {
       return await this.db.query.todosTable.findMany({
-        where: eq(schema.todosTable.userId, user.id),
+        where: and(
+          eq(schema.todosTable.userId, user.id),
+          isNull(schema.todosTable.tenantId),
+        ),
       });
     }
   }
@@ -62,7 +63,10 @@ export class TodosService {
       });
     } else {
       return await this.db.query.todosTable.findFirst({
-        where: eq(schema.todosTable.id, id),
+        where: and(
+          eq(schema.todosTable.id, id),
+          isNull(schema.todosTable.tenantId),
+        ),
       });
     }
   }
@@ -88,26 +92,34 @@ export class TodosService {
       return await this.db
         .update(schema.todosTable)
         .set(updateTodoDto)
-        .where(eq(schema.todosTable.id, id))
+        .where(
+          and(eq(schema.todosTable.id, id), isNull(schema.todosTable.tenantId)),
+        )
         .returning()
         .then(takeUniqueOrThrow);
     }
   }
 
-  async remove(id: number, tenantId?: number) {
+  async remove(id: number, tenantId?: number): Promise<SelectTodo> {
     if (tenantId) {
-      await this.db
+      return await this.db
         .delete(schema.todosTable)
         .where(
           and(
             eq(schema.todosTable.id, id),
             eq(schema.todosTable.tenantId, tenantId),
           ),
-        );
+        )
+        .returning()
+        .then(takeUniqueOrThrow);
     } else {
-      await this.db
+      return await this.db
         .delete(schema.todosTable)
-        .where(eq(schema.todosTable.id, id));
+        .where(
+          and(eq(schema.todosTable.id, id), isNull(schema.todosTable.tenantId)),
+        )
+        .returning()
+        .then(takeUniqueOrThrow);
     }
   }
 }

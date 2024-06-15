@@ -40,7 +40,7 @@ export class UsersController {
   async invite(@Body() inviteUserDto: InviteUserDto) {
     await this.usersService.invite(
       inviteUserDto,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      this.tenantProvider.getTenantId(),
     );
   }
 
@@ -62,7 +62,7 @@ export class UsersController {
   @Get()
   async findAll(): Promise<UserDto[]> {
     const users = await this.usersService.findAll(
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      this.tenantProvider.getTenantId(),
     );
     return users.map((user) => ({
       id: user.id,
@@ -80,7 +80,7 @@ export class UsersController {
   async findOne(@Param('id') id: string, @Res() response: Response) {
     const user: User = await this.usersService.findOne(
       +id,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      this.tenantProvider.getTenantId(),
     );
 
     if (!user) {
@@ -119,9 +119,6 @@ export class UsersController {
   @RequiresPermissions(Permission.delete_self, Permission.tenant_delete_self)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    await this.usersService.remove(
-      +id,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
-    );
+    await this.usersService.remove(+id, this.tenantProvider.getTenantId());
   }
 }

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -29,7 +30,7 @@ export class TodosController {
   async create(@Body() createTodoDto: CreateTodoDto): Promise<TodoDto> {
     const todo = await this.todosService.create(
       createTodoDto,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      this.tenantProvider.getTenantId(),
     );
     return {
       id: todo.id,
@@ -42,7 +43,7 @@ export class TodosController {
   @Get()
   async findAll(): Promise<TodoDto[]> {
     const todos = await this.todosService.findAll(
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      this.tenantProvider.getTenantId(),
     );
     return todos.map((todo) => ({
       id: todo.id,
@@ -52,11 +53,11 @@ export class TodosController {
   }
 
   @RequiresPermissions(Permission.read_self)
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<TodoDto> {
+  @Get(':todoId')
+  async findOne(@Param('todoId') todoId: string): Promise<TodoDto> {
     const todo = await this.todosService.findOne(
-      +id,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
+      +todoId,
+      this.tenantProvider.getTenantId(),
     );
     return {
       id: todo.id,
@@ -66,29 +67,43 @@ export class TodosController {
   }
 
   @RequiresPermissions(Permission.update_self)
-  @Patch(':id')
+  @Patch(':todoId')
   async update(
-    @Param('id') id: string,
+    @Param('todoId') todoId: string,
     @Body() updateTodoDto: UpdateTodoDto,
-  ): Promise<TodoDto> {
-    const todo = await this.todosService.update(
-      +id,
-      updateTodoDto,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
-    );
-    return {
-      id: todo.id,
-      title: todo.title,
-      description: todo.description,
-    };
+    @Res() res,
+  ) {
+    try {
+      const todo = await this.todosService.update(
+        +todoId,
+        updateTodoDto,
+        this.tenantProvider.getTenantId(),
+      );
+      res.status(200).send({
+        id: todo.id,
+        title: todo.title,
+        description: todo.description,
+      });
+    } catch (err) {
+      res.status(404).send();
+    }
   }
 
   @RequiresPermissions(Permission.delete_self)
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    await this.todosService.remove(
-      +id,
-      this.tenantProvider.isTenantRequest && this.tenantProvider.tenantId,
-    );
+  @Delete(':todoId')
+  async remove(@Param('todoId') todoId: string, @Res() res) {
+    try {
+      const todo = await this.todosService.remove(
+        +todoId,
+        this.tenantProvider.getTenantId(),
+      );
+      res.status(200).send({
+        id: todo.id,
+        title: todo.title,
+        description: todo.description,
+      });
+    } catch (err) {
+      res.status(404).send();
+    }
   }
 }

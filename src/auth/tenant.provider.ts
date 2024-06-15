@@ -4,11 +4,16 @@ import { Request } from 'express';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TenantProvider {
-  isTenantRequest: boolean;
-  tenantId: number;
+  private readonly tenantId: number;
 
   constructor(@Inject(REQUEST) private request: Request) {
     this.tenantId = Number.parseInt(request.headers['x-tenant-id'] as string);
-    this.isTenantRequest = !!this.tenantId;
+  }
+
+  getTenantId(): number | undefined {
+    if (this.tenantId) {
+      return this.tenantId;
+    }
+    return undefined;
   }
 }

@@ -52,7 +52,7 @@ export class PermissionsGuard implements CanActivate {
         context.switchToHttp().getRequest().params.id,
       );
 
-      if (requestUserId != user.id) {
+      if (requestUserId && requestUserId != user.id) {
         this.logger.debug(
           'Requesting user id does not match the user id in the request.',
         );
