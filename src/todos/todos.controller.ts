@@ -15,14 +15,14 @@ import { CreateTodoDto } from './dto/create-todo.dto';
 import { TodoDto } from './dto/todo.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
-import { TenantProvider } from '../auth/tenant.provider';
+import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 
 @ApiTags('Todos')
 @Controller('todos')
 export class TodosController {
   constructor(
     private readonly todosService: TodosService,
-    private readonly tenantProvider: TenantProvider,
+    private readonly requestMetadata: RequestMetadataProvider,
   ) {}
 
   @RequiresPermissions(Permission.create_self, Permission.tenant_create_self)
@@ -30,7 +30,8 @@ export class TodosController {
   async create(@Body() createTodoDto: CreateTodoDto): Promise<TodoDto> {
     const todo = await this.todosService.create(
       createTodoDto,
-      this.tenantProvider.getTenantId(),
+      this.requestMetadata.getUserId(),
+      this.requestMetadata.getTenantId(),
     );
     return {
       id: todo.id,
@@ -43,7 +44,8 @@ export class TodosController {
   @Get()
   async findAll(): Promise<TodoDto[]> {
     const todos = await this.todosService.findAll(
-      this.tenantProvider.getTenantId(),
+      this.requestMetadata.getUserId(),
+      this.requestMetadata.getTenantId(),
     );
     return todos.map((todo) => ({
       id: todo.id,
@@ -57,7 +59,7 @@ export class TodosController {
   async findOne(@Param('todoId') todoId: string): Promise<TodoDto> {
     const todo = await this.todosService.findOne(
       +todoId,
-      this.tenantProvider.getTenantId(),
+      this.requestMetadata.getTenantId(),
     );
     return {
       id: todo.id,
@@ -77,7 +79,7 @@ export class TodosController {
       const todo = await this.todosService.update(
         +todoId,
         updateTodoDto,
-        this.tenantProvider.getTenantId(),
+        this.requestMetadata.getTenantId(),
       );
       res.status(200).send({
         id: todo.id,
@@ -95,7 +97,7 @@ export class TodosController {
     try {
       const todo = await this.todosService.remove(
         +todoId,
-        this.tenantProvider.getTenantId(),
+        this.requestMetadata.getTenantId(),
       );
       res.status(200).send({
         id: todo.id,

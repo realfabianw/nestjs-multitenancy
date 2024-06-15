@@ -17,7 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
 import { Response } from 'express';
-import { TenantProvider } from '../auth/tenant.provider';
+import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 import { InviteUserDto } from './dto/invite-user.dto';
 
 @ApiTags('Users')
@@ -25,7 +25,7 @@ import { InviteUserDto } from './dto/invite-user.dto';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly tenantProvider: TenantProvider,
+    private readonly tenantProvider: RequestMetadataProvider,
   ) {}
 
   /**

@@ -1,5 +1,5 @@
 {
-  "id": "95eed6bb-4585-4872-a35a-5bd745c149f0",
+  "id": "10115dad-09e2-4616-9c6d-df43be49581b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -135,6 +135,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
@@ -164,6 +170,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "todos_tenant_id_tenants_id_fk": {
+          "name": "todos_tenant_id_tenants_id_fk",
+          "tableFrom": "todos",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "todos_user_id_users_id_fk": {
           "name": "todos_user_id_users_id_fk",
           "tableFrom": "todos",

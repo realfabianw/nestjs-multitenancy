@@ -178,31 +178,3 @@ export class UsersService {
     }
   }
 }
-
-/**
- * 
-Type '{ id: number; email: string; password: string; roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }' is not assignable to type 'User'.
-
-
-Type 
-  '{ id: number; email: string; password: string; roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }'
-is not assignable to type
-  '{ roles: { id: number; userId: number; role: "ADMIN" | "USER"; }[]; tenants: { userId: number; tenantUserId: number; tenantId: number; } & { roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]; }'.
-
-
-  Types of property 'tenants' are incompatible.
-Type 
-
-'{ userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'
-is not assignable to type
-'{ userId: number; tenantUserId: number; tenantId: number; } & { roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'.
-
-
-
-Type
-'{ userId: number; tenantUserId: number; tenantId: number; roles: { role: "ADMIN" | "USER"; tenantUserId: number; }[]; }[]'
-is missing the following properties from type
-'{ userId: number; tenantUserId: number; tenantId: number; }': userId, tenantUserId, tenantIdts(2322)
- * 
- * 
- */

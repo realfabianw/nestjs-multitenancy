@@ -14,15 +14,22 @@ import { TenantDto } from './dto/tenant.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
 import { ApiTags } from '@nestjs/swagger';
+import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 
 @ApiTags('Tenants')
 @Controller('tenants')
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly requestMetadata: RequestMetadataProvider,
+  ) {}
 
   @Post()
   async create(@Body() createTenantDto: CreateTenantDto): Promise<TenantDto> {
-    return this.tenantsService.create(createTenantDto);
+    return this.tenantsService.create(
+      createTenantDto,
+      this.requestMetadata.getUserId(),
+    );
   }
 
   @RequiresPermissions(Permission.tenant_read_all)

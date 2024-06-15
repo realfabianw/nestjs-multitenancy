@@ -1,12 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import { SelectTenant, SelectTenantUser, User } from '../drizzle/schema';
-import { REQUEST } from '@nestjs/core';
+import { SelectTenant, SelectTenantUser } from '../drizzle/schema';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../drizzle/schema';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
-import { Request } from 'express';
 import { eq } from 'drizzle-orm';
 
 @Injectable()
@@ -15,11 +13,12 @@ export class TenantsService {
 
   constructor(
     @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
-    @Inject(REQUEST) private request: Request,
   ) {}
 
-  async create(createTenantDto: CreateTenantDto): Promise<SelectTenant> {
-    const user = this.request.user as User;
+  async create(
+    createTenantDto: CreateTenantDto,
+    userId: number,
+  ): Promise<SelectTenant> {
     const tenant: SelectTenant = await this.db
       .insert(schema.tenantsTable)
       .values(createTenantDto)
@@ -30,7 +29,7 @@ export class TenantsService {
       .insert(schema.tenantUsersTable)
       .values({
         tenantId: tenant.id,
-        userId: user.id,
+        userId: userId,
       })
       .returning()
       .then(takeUniqueOrThrow);
