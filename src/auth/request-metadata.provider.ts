@@ -11,20 +11,22 @@ export class RequestMetadataProvider {
     return this.request;
   }
 
-  getUser(): User {
+  getRequestingUser(): User {
     return this.request.user as User;
   }
 
-  getUserId(): number {
-    return this.getUser().id;
+  getRequestingUserId(): number {
+    return this.getRequestingUser().id;
   }
 
-  isSystemAdmin(): boolean {
-    return this.getUser().roles.some((role) => role.role == 'SYSTEM_ADMIN');
+  isRequestingUserSystemAdmin(): boolean {
+    return this.getRequestingUser().roles.some(
+      (role) => role.role == 'SYSTEM_ADMIN',
+    );
   }
 
-  isTenantAdmin(): boolean {
-    return this.getUser()
+  isRequestingUserTenantAdmin(): boolean {
+    return this.getRequestingUser()
       .tenantUsers.filter(
         (tenantUser) => tenantUser.tenantId == this.getTenantId(),
       )

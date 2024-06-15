@@ -51,7 +51,7 @@ export class RolesService {
     }
 
     if (newRoles.includes('SYSTEM_ADMIN')) {
-      if (!this.requestMetaData.isSystemAdmin()) {
+      if (!this.requestMetaData.isRequestingUserSystemAdmin()) {
         throw new UnauthorizedException(
           'Only system admins can assign SYSTEM_ADMIN role.',
         );
@@ -59,7 +59,7 @@ export class RolesService {
     }
 
     if (newRoles.includes('TENANT_ADMIN')) {
-      if (!this.requestMetaData.isTenantAdmin()) {
+      if (!this.requestMetaData.isRequestingUserTenantAdmin()) {
         throw new UnauthorizedException(
           'Only tenant admins can assign TENANT_ADMIN role.',
         );

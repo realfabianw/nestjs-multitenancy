@@ -28,7 +28,7 @@ export class TenantsController {
   async create(@Body() createTenantDto: CreateTenantDto): Promise<TenantDto> {
     return this.tenantsService.create(
       createTenantDto,
-      this.requestMetadata.getUserId(),
+      this.requestMetadata.getRequestingUserId(),
     );
   }
 

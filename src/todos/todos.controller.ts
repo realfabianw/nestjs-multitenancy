@@ -30,7 +30,7 @@ export class TodosController {
   async create(@Body() createTodoDto: CreateTodoDto): Promise<TodoDto> {
     const todo = await this.todosService.create(
       createTodoDto,
-      this.requestMetadata.getUserId(),
+      this.requestMetadata.getRequestingUserId(),
       this.requestMetadata.getTenantId(),
     );
     return {
@@ -44,7 +44,7 @@ export class TodosController {
   @Get()
   async findAll(): Promise<TodoDto[]> {
     const todos = await this.todosService.findAll(
-      this.requestMetadata.getUserId(),
+      this.requestMetadata.getRequestingUserId(),
       this.requestMetadata.getTenantId(),
     );
     return todos.map((todo) => ({
