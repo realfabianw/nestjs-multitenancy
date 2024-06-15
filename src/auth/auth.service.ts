@@ -4,7 +4,6 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt-payload';
 import { User } from '../drizzle/schema';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +11,6 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly encryptionService: EncryptionService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
