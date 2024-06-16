@@ -28,8 +28,6 @@ export class TodosController {
   @RequiresPermissions(Permission.create_self, Permission.tenant_create_self)
   @Post()
   async create(@Body() createTodoDto: CreateTodoDto): Promise<TodoDto> {
-    if (this.requestMetadata.getTenantId()) {
-    }
     const todo = await this.todosService.create(
       createTodoDto,
       this.requestMetadata.getRequestingUserId(),
