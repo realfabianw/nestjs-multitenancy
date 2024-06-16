@@ -25,17 +25,13 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user with email: ${createUserDto.email}`);
     const user: SelectUser = await this.db
-      .insert(schema.usersTable)
+      .insert(schema.users)
       .values({
         email: createUserDto.email,
         password: await this.encryptionService.hash(createUserDto.password),
       })
       .returning()
       .then(takeUniqueOrThrow);
-
-    await this.db.insert(schema.userRolesTable).values({
-      userId: user.id,
-    });
 
     return await this.findOne(user.id);
   }
@@ -49,35 +45,23 @@ export class UsersService {
 
     if (tenantId) {
       // Add the new user to the tenant
-      const tenantUser = await this.db
-        .insert(schema.tenantUsersTable)
-        .values({
-          tenantId: tenantId,
-          userId: userToInvite.id,
-        })
-        .returning()
-        .then(takeUniqueOrThrow);
-
-      await this.db.insert(schema.tenantUserRolesTable).values({
-        tenantUserId: tenantUser.tenantUserId,
-        role: 'TENANT_USER',
+      await this.db.insert(schema.tenantMemberships).values({
+        tenantId: tenantId,
+        userId: userToInvite.id,
+        role: 'MEMBER',
       });
     }
   }
 
   async findAll(tenantId?: number): Promise<User[]> {
     if (tenantId) {
-      const entries = await this.db.query.tenantUsersTable.findMany({
-        where: eq(schema.tenantUsersTable.tenantId, tenantId),
+      const entries = await this.db.query.tenantMemberships.findMany({
+        where: eq(schema.tenantMemberships.tenantId, tenantId),
         with: {
           user: {
             with: {
-              roles: true,
-              tenantUsers: {
-                where: eq(schema.tenantUsersTable.tenantId, tenantId),
-                with: {
-                  roles: true,
-                },
+              tenantMemberships: {
+                where: eq(schema.tenantMemberships.tenantId, tenantId),
               },
             },
           },
@@ -86,14 +70,9 @@ export class UsersService {
 
       return entries.map((entry) => entry.user);
     } else {
-      return await this.db.query.usersTable.findMany({
+      return await this.db.query.users.findMany({
         with: {
-          roles: true,
-          tenantUsers: {
-            with: {
-              roles: true,
-            },
-          },
+          tenantMemberships: true,
         },
       });
     }
@@ -101,20 +80,16 @@ export class UsersService {
 
   async findOne(id: number, tenantId?: number): Promise<User> {
     if (tenantId) {
-      const entry = await this.db.query.tenantUsersTable.findFirst({
+      const entry = await this.db.query.tenantMemberships.findFirst({
         where: and(
-          eq(schema.tenantUsersTable.tenantId, tenantId),
-          eq(schema.tenantUsersTable.userId, id),
+          eq(schema.tenantMemberships.tenantId, tenantId),
+          eq(schema.tenantMemberships.userId, id),
         ),
         with: {
           user: {
             with: {
-              roles: true,
-              tenantUsers: {
-                where: eq(schema.tenantUsersTable.tenantId, tenantId),
-                with: {
-                  roles: true,
-                },
+              tenantMemberships: {
+                where: eq(schema.tenantMemberships.tenantId, tenantId),
               },
             },
           },
@@ -123,30 +98,20 @@ export class UsersService {
 
       return entry.user;
     } else {
-      return await this.db.query.usersTable.findFirst({
-        where: eq(schema.usersTable.id, id),
+      return await this.db.query.users.findFirst({
+        where: eq(schema.users.id, id),
         with: {
-          roles: true,
-          tenantUsers: {
-            with: {
-              roles: true,
-            },
-          },
+          tenantMemberships: true,
         },
       });
     }
   }
 
   async findOneByEmail(email: string): Promise<User> {
-    const user = await this.db.query.usersTable.findFirst({
-      where: eq(schema.usersTable.email, email),
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.email, email),
       with: {
-        roles: true,
-        tenantUsers: {
-          with: {
-            roles: true,
-          },
-        },
+        tenantMemberships: true,
       },
     });
     return user;
@@ -154,9 +119,9 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.db
-      .update(schema.usersTable)
+      .update(schema.users)
       .set(updateUserDto)
-      .where(eq(schema.usersTable.id, id));
+      .where(eq(schema.users.id, id));
 
     return await this.findOne(id);
   }
@@ -164,17 +129,15 @@ export class UsersService {
   async remove(id: number, tenantId?: number) {
     if (tenantId) {
       await this.db
-        .delete(schema.tenantUsersTable)
+        .delete(schema.tenantMemberships)
         .where(
           and(
-            eq(schema.tenantUsersTable.tenantId, tenantId),
-            eq(schema.tenantUsersTable.userId, id),
+            eq(schema.tenantMemberships.tenantId, tenantId),
+            eq(schema.tenantMemberships.userId, id),
           ),
         );
     } else {
-      await this.db
-        .delete(schema.usersTable)
-        .where(eq(schema.usersTable.id, id));
+      await this.db.delete(schema.users).where(eq(schema.users.id, id));
     }
   }
 }

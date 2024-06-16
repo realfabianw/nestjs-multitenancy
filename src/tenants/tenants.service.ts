@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import { SelectTenant, SelectTenantUser } from '../drizzle/schema';
+import { SelectTenant } from '../drizzle/schema';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../drizzle/schema';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
@@ -20,25 +20,17 @@ export class TenantsService {
     userId: number,
   ): Promise<SelectTenant> {
     const tenant: SelectTenant = await this.db
-      .insert(schema.tenantsTable)
+      .insert(schema.tenants)
       .values(createTenantDto)
       .returning()
       .then(takeUniqueOrThrow);
 
-    const tenantUser: SelectTenantUser = await this.db
-      .insert(schema.tenantUsersTable)
+    await this.db
+      .insert(schema.tenantMemberships)
       .values({
         tenantId: tenant.id,
         userId: userId,
-      })
-      .returning()
-      .then(takeUniqueOrThrow);
-
-    await this.db
-      .insert(schema.tenantUserRolesTable)
-      .values({
-        tenantUserId: tenantUser.tenantUserId,
-        role: 'TENANT_ADMIN',
+        role: 'ADMIN',
       })
       .returning()
       .then(takeUniqueOrThrow);
@@ -47,12 +39,12 @@ export class TenantsService {
   }
 
   async findAll(): Promise<SelectTenant[]> {
-    return await this.db.select().from(schema.tenantsTable);
+    return await this.db.select().from(schema.tenants);
   }
 
   async findOne(id: number): Promise<SelectTenant> {
-    return await this.db.query.tenantsTable.findFirst({
-      where: eq(schema.tenantsTable.id, id),
+    return await this.db.query.tenants.findFirst({
+      where: eq(schema.tenants.id, id),
     });
   }
 
@@ -61,17 +53,17 @@ export class TenantsService {
     updateTenantDto: UpdateTenantDto,
   ): Promise<SelectTenant> {
     await this.db
-      .update(schema.tenantsTable)
+      .update(schema.tenants)
       .set(updateTenantDto)
-      .where(eq(schema.tenantsTable.id, id));
+      .where(eq(schema.tenants.id, id));
 
     return await this.findOne(id);
   }
 
   async remove(id: number): Promise<SelectTenant> {
     return await this.db
-      .delete(schema.tenantsTable)
-      .where(eq(schema.tenantsTable.id, id))
+      .delete(schema.tenants)
+      .where(eq(schema.tenants.id, id))
       .then(takeUniqueOrThrow);
   }
 }

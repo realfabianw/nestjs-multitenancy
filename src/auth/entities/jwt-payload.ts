@@ -1,6 +1,3 @@
-import { UserRole } from '../../drizzle/schema';
-
-export interface JwtPayload {
+export class JwtPayload {
   sub: number;
-  roles: UserRole[];
 }

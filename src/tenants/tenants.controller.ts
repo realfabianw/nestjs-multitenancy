@@ -24,6 +24,7 @@ export class TenantsController {
     private readonly requestMetadata: RequestMetadataProvider,
   ) {}
 
+  @RequiresPermissions(Permission.create_self)
   @Post()
   async create(@Body() createTenantDto: CreateTenantDto): Promise<TenantDto> {
     return this.tenantsService.create(
@@ -38,23 +39,24 @@ export class TenantsController {
     return this.tenantsService.findAll();
   }
 
+  @RequiresPermissions(Permission.tenant_read_self)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<TenantDto> {
-    return this.tenantsService.findOne(+id);
+  async findOne(@Param('id') tenantId: string): Promise<TenantDto> {
+    return this.tenantsService.findOne(+tenantId);
   }
 
   @RequiresPermissions(Permission.tenant_update_self)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') tenantId: string,
     @Body() updateTenantDto: UpdateTenantDto,
   ): Promise<TenantDto> {
-    return this.tenantsService.update(+id, updateTenantDto);
+    return this.tenantsService.update(+tenantId, updateTenantDto);
   }
 
   @RequiresPermissions(Permission.tenant_delete_self)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<TenantDto> {
-    return this.tenantsService.remove(+id);
+  async remove(@Param('id') tenantId: string): Promise<TenantDto> {
+    return this.tenantsService.remove(+tenantId);
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { UserRole } from '../../drizzle/schema';
+import { SystemRole, TenantRole, User } from '../../drizzle/schema';
 
 export default class UserDto {
   @ApiProperty({
@@ -19,11 +19,23 @@ export default class UserDto {
     required: true,
   })
   @IsNotEmpty()
-  roles: UserRole[];
+  role: SystemRole;
 
   @ApiProperty({
     required: true,
   })
   @IsNotEmpty()
-  tenantMemberships: { tenantId: number; roles: UserRole[] }[];
+  tenantMemberships: { tenantId: number; role: TenantRole }[];
+
+  static fromUser(user: User): UserDto {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      tenantMemberships: user.tenantMemberships.map((membership) => ({
+        tenantId: membership.tenantId,
+        role: membership.role,
+      })),
+    };
+  }
 }

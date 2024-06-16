@@ -34,16 +34,9 @@ export class AuthController {
   @Public()
   @Post('register')
   async register(@Body() userDto: CreateUserDto): Promise<UserDto> {
-    const user = await this.usersService.create(userDto);
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-        tenantId: tenantUser.tenantId,
-        roles: tenantUser.roles.map((role) => role.role),
-      })),
-    };
+    return await this.usersService
+      .create(userDto)
+      .then((user) => UserDto.fromUser(user));
   }
 
   @ApiResponse({
@@ -121,15 +114,7 @@ export class AuthController {
     );
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        roles: user.roles.map((role) => role.role),
-        tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-          tenantId: tenantUser.tenantId,
-          roles: tenantUser.roles.map((role) => role.role),
-        })),
-      },
+      user: UserDto.fromUser(user),
       accessToken: accessToken,
       refreshToken: refreshToken,
     };

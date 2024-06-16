@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { SelectTodo } from '../../drizzle/schema';
 
 export class TodoDto {
   @ApiProperty({
@@ -20,4 +21,12 @@ export class TodoDto {
   })
   @IsNotEmpty()
   description: string;
+
+  static fromEntity(todo: SelectTodo): TodoDto {
+    return {
+      id: todo.id,
+      title: todo.title,
+      description: todo.description,
+    };
+  }
 }

@@ -28,7 +28,6 @@ export class AuthService {
   async createToken(user: User, expiresIn: string): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
-      roles: user.roles.map((role) => role.role),
     };
     return this.jwtService.sign(payload, {
       expiresIn: expiresIn,

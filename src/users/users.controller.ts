@@ -47,15 +47,7 @@ export class UsersController {
   @Get('me')
   async findAuthenticatedUser(@Request() request): Promise<UserDto> {
     const user: User = request.user;
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-        tenantId: tenantUser.tenantId,
-        roles: tenantUser.roles.map((role) => role.role),
-      })),
-    };
+    return UserDto.fromUser(user);
   }
 
   @RequiresPermissions(Permission.read_all, Permission.tenant_read_all)
@@ -64,15 +56,7 @@ export class UsersController {
     const users = await this.usersService.findAll(
       this.tenantProvider.getTenantId(),
     );
-    return users.map((user) => ({
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-        tenantId: tenantUser.tenantId,
-        roles: tenantUser.roles.map((role) => role.role),
-      })),
-    }));
+    return users.map((user) => UserDto.fromUser(user));
   }
 
   @RequiresPermissions(Permission.read_self, Permission.tenant_read_self)
@@ -86,15 +70,7 @@ export class UsersController {
     if (!user) {
       response.status(404).json({ message: 'User not found' });
     } else {
-      response.status(200).json({
-        id: user.id,
-        email: user.email,
-        roles: user.roles.map((role) => role.role),
-        tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-          tenantId: tenantUser.tenantId,
-          roles: tenantUser.roles.map((role) => role.role),
-        })),
-      });
+      response.status(200).json(UserDto.fromUser(user));
     }
   }
 
@@ -105,15 +81,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserDto> {
     const user: User = await this.usersService.update(+id, updateUserDto);
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-        tenantId: tenantUser.tenantId,
-        roles: tenantUser.roles.map((role) => role.role),
-      })),
-    };
+    return UserDto.fromUser(user);
   }
 
   @RequiresPermissions(Permission.delete_self, Permission.tenant_delete_self)

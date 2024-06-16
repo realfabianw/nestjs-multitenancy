@@ -4,7 +4,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 import UserDto from '../users/dto/user.dto';
-import { User } from '../drizzle/schema';
+import { SystemRole, TenantRole } from '../drizzle/schema';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
 
@@ -22,19 +22,20 @@ export class RolesController {
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateRoleDto,
   ): Promise<UserDto> {
-    const user: User = await this.rolesService.update(
-      +id,
-      updateRoleDto,
-      this.requestMetadata.getTenantId(),
-    );
-    return {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.role),
-      tenantMemberships: user.tenantUsers.map((tenantUser) => ({
-        tenantId: tenantUser.tenantId,
-        roles: tenantUser.roles.map((role) => role.role),
-      })),
-    };
+    if (this.requestMetadata.getTenantId()) {
+      // Update Tenant Role
+      return await this.rolesService
+        .updateTenantRole(
+          +id,
+          updateRoleDto.role as TenantRole,
+          this.requestMetadata.getTenantId(),
+        )
+        .then((user) => UserDto.fromUser(user));
+    } else {
+      // Update System Role
+      return await this.rolesService
+        .updateSystemRole(+id, updateRoleDto.role as SystemRole)
+        .then((user) => UserDto.fromUser(user));
+    }
   }
 }

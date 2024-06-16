@@ -28,30 +28,24 @@ export class TodosController {
   @RequiresPermissions(Permission.create_self, Permission.tenant_create_self)
   @Post()
   async create(@Body() createTodoDto: CreateTodoDto): Promise<TodoDto> {
+    if (this.requestMetadata.getTenantId()) {
+    }
     const todo = await this.todosService.create(
       createTodoDto,
       this.requestMetadata.getRequestingUserId(),
       this.requestMetadata.getTenantId(),
     );
-    return {
-      id: todo.id,
-      title: todo.title,
-      description: todo.description,
-    };
+    return TodoDto.fromEntity(todo);
   }
 
-  @RequiresPermissions(Permission.read_all)
+  @RequiresPermissions(Permission.read_self)
   @Get()
   async findAll(): Promise<TodoDto[]> {
     const todos = await this.todosService.findAll(
       this.requestMetadata.getRequestingUserId(),
       this.requestMetadata.getTenantId(),
     );
-    return todos.map((todo) => ({
-      id: todo.id,
-      title: todo.title,
-      description: todo.description,
-    }));
+    return todos.map((todo) => TodoDto.fromEntity(todo));
   }
 
   @RequiresPermissions(Permission.read_self)
@@ -61,11 +55,7 @@ export class TodosController {
       +todoId,
       this.requestMetadata.getTenantId(),
     );
-    return {
-      id: todo.id,
-      title: todo.title,
-      description: todo.description,
-    };
+    return TodoDto.fromEntity(todo);
   }
 
   @RequiresPermissions(Permission.update_self)
@@ -81,11 +71,7 @@ export class TodosController {
         updateTodoDto,
         this.requestMetadata.getTenantId(),
       );
-      res.status(200).send({
-        id: todo.id,
-        title: todo.title,
-        description: todo.description,
-      });
+      res.status(200).send(TodoDto.fromEntity(todo));
     } catch (err) {
       res.status(404).send();
     }
@@ -99,11 +85,7 @@ export class TodosController {
         +todoId,
         this.requestMetadata.getTenantId(),
       );
-      res.status(200).send({
-        id: todo.id,
-        title: todo.title,
-        description: todo.description,
-      });
+      res.status(200).send(TodoDto.fromEntity(todo));
     } catch (err) {
       res.status(404).send();
     }

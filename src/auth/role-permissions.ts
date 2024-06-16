@@ -1,43 +1,48 @@
-import { UserRole } from '../drizzle/schema';
+import { SystemRole, TenantRole } from '../drizzle/schema';
 import { Permission } from './entities/permissions.enum';
 
-export interface RolePermission {
-  role: UserRole;
+export interface RolePermission<T> {
+  role: T;
   permissions: Permission[];
 }
 
-export const rolePermissions: RolePermission[] = [
+export const systemPermissions: RolePermission<SystemRole>[] = [
   {
-    role: 'SYSTEM_ADMIN',
+    role: 'ADMIN',
     permissions: [Permission.manage_all, Permission.tenant_manage_all],
   },
   {
-    role: 'SYSTEM_USER',
-    permissions: [
-      Permission.read_self,
-      Permission.update_self,
-      Permission.delete_self,
-    ],
-  },
-  {
-    role: 'TENANT_ADMIN',
-    permissions: [Permission.tenant_manage_all],
-  },
-  {
-    role: 'TENANT_USER',
-    permissions: [
-      Permission.tenant_read_self,
-      Permission.tenant_update_self,
-      Permission.tenant_delete_self,
-    ],
+    role: 'CUSTOMER',
+    permissions: [Permission.manage_self],
   },
 ];
 
-export function getUniquePermissionsFromRole(role: UserRole): Permission[] {
-  const permissions: Permission[] = rolePermissions.find(
-    (rolePermission) => rolePermission.role === role,
-  )?.permissions;
+export const tenantPermissions: RolePermission<TenantRole>[] = [
+  {
+    role: 'ADMIN',
+    permissions: [Permission.tenant_manage_self],
+  },
+  {
+    role: 'MEMBER',
+    permissions: [Permission.tenant_read_self, Permission.tenant_update_self],
+  },
+];
 
+export function getPermissionsFromSystemRole(role: SystemRole): Permission[] {
+  const permissions = systemPermissions.find(
+    (rolePermissions) => rolePermissions.role === role,
+  )?.permissions;
+  return addInheritedPermissions(permissions);
+}
+
+export function getPermissionsFromTenantRole(role: TenantRole): Permission[] {
+  const permissions = tenantPermissions.find(
+    (rolePermissions) => rolePermissions.role === role,
+  )?.permissions;
+  return addInheritedPermissions(permissions);
+}
+
+function addInheritedPermissions(permissions: Permission[]): Permission[] {
   // Adding manage permissions.
 
   if (permissions.includes(Permission.manage_self)) {

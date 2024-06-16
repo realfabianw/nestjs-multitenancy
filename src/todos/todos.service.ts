@@ -18,16 +18,28 @@ export class TodosService {
     userId: number,
     tenantId?: number,
   ): Promise<SelectTodo> {
-    return await this.db
-      .insert(schema.todosTable)
-      .values({
-        userId: userId,
-        title: createTodoDto.title,
-        description: createTodoDto.description,
-        tenantId: tenantId,
-      })
-      .returning()
-      .then(takeUniqueOrThrow);
+    if (tenantId) {
+      return await this.db
+        .insert(schema.todosTable)
+        .values({
+          userId: userId,
+          title: createTodoDto.title,
+          description: createTodoDto.description,
+          tenantId: tenantId,
+        })
+        .returning()
+        .then(takeUniqueOrThrow);
+    } else {
+      return await this.db
+        .insert(schema.todosTable)
+        .values({
+          userId: userId,
+          title: createTodoDto.title,
+          description: createTodoDto.description,
+        })
+        .returning()
+        .then(takeUniqueOrThrow);
+    }
   }
 
   async findAll(userId: number, tenantId?: number): Promise<SelectTodo[]> {

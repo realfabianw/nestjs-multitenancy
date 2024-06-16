@@ -20,22 +20,18 @@ export class RequestMetadataProvider {
   }
 
   isRequestingUserSystemAdmin(): boolean {
-    return this.getRequestingUser().roles.some(
-      (role) => role.role == 'SYSTEM_ADMIN',
-    );
+    return this.getRequestingUser().role == 'ADMIN';
   }
 
   isRequestingUserTenantAdmin(): boolean {
     return this.getRequestingUser()
-      .tenantUsers.filter(
+      .tenantMemberships.filter(
         (tenantUser) => tenantUser.tenantId == this.getTenantId(),
       )
-      .some((tenantUser) =>
-        tenantUser.roles.some((role) => role.role == 'TENANT_ADMIN'),
-      );
+      .some((tenantUser) => tenantUser.role == 'ADMIN');
   }
 
-  getTenantId(): number {
+  getTenantId(): number | undefined {
     // TODO: It is not recommended to transfer the tenantId in the headers.
     return Number.parseInt(this.request.headers['x-tenant-id'] as string);
   }

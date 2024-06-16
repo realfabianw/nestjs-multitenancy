@@ -5,10 +5,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User, UserRole } from '../../drizzle/schema';
+import { TenantRole, User } from '../../drizzle/schema';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { Permission } from '../entities/permissions.enum';
-import { getUniquePermissionsFromRole } from '../role-permissions';
+import {
+  getPermissionsFromSystemRole,
+  getPermissionsFromTenantRole,
+} from '../role-permissions';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -75,29 +78,18 @@ export class PermissionsGuard implements CanActivate {
     const tenantId: number = Number.parseInt(
       context.switchToHttp().getRequest().headers['x-tenant-id'],
     );
-
     const user: User = context.switchToHttp().getRequest().user;
-    const roles = this.getUniqueRolesFromRequestingUser(user, tenantId);
-    this.logger.debug('User roles: ' + roles.join(', '));
-    return this.getUniquePermissionsFromRoles(roles);
-  }
+    this.logger.debug('System Role: ' + user.role);
+    const permissions: Permission[] = getPermissionsFromSystemRole(user.role);
 
-  getUniquePermissionsFromRoles(roles: UserRole[]): Permission[] {
-    const permissions: Permission[] = [];
-    for (const role of roles) {
-      permissions.push(...getUniquePermissionsFromRole(role));
-    }
-    return [...new Set<Permission>(permissions)];
-  }
+    try {
+      const tenantRole: TenantRole = user.tenantMemberships.filter(
+        (tm) => tm.tenantId === tenantId,
+      )[0].role;
+      this.logger.debug('Tenant Role: ' + tenantRole);
+      permissions.push(...getPermissionsFromTenantRole(tenantRole));
+    } catch (err) {}
 
-  private getUniqueRolesFromRequestingUser(user: User, tenantId: number) {
-    const roles: UserRole[] = user.roles.map((role) => role.role);
-    roles.push(
-      ...user.tenantUsers
-        .filter((tenantUser) => tenantUser.tenantId === tenantId)
-        .map((tenantUser) => tenantUser.roles.map((role) => role.role))
-        .flat(),
-    );
-    return [...new Set(roles)];
+    return [...new Set(permissions)];
   }
 }
