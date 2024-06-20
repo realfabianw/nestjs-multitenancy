@@ -3,8 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from '../drizzle/schema';
-import { SelectUser, User } from '../drizzle/schema';
+import { SelectUser, User, drizzleSchema } from '../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { InviteUserDto } from './dto/invite-user.dto';
@@ -18,14 +17,15 @@ import { InviteUserDto } from './dto/invite-user.dto';
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(
-    @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
+    @Inject('DB_PROD')
+    private readonly db: PostgresJsDatabase<typeof drizzleSchema>,
     private readonly encryptionService: EncryptionService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user with email: ${createUserDto.email}`);
     const user: SelectUser = await this.db
-      .insert(schema.users)
+      .insert(drizzleSchema.users)
       .values({
         email: createUserDto.email,
         password: await this.encryptionService.hash(createUserDto.password),
@@ -45,7 +45,7 @@ export class UsersService {
 
     if (tenantId) {
       // Add the new user to the tenant
-      await this.db.insert(schema.tenantMemberships).values({
+      await this.db.insert(drizzleSchema.tenantMemberships).values({
         tenantId: tenantId,
         userId: userToInvite.id,
         role: 'MEMBER',
@@ -56,12 +56,12 @@ export class UsersService {
   async findAll(tenantId?: number): Promise<User[]> {
     if (tenantId) {
       const entries = await this.db.query.tenantMemberships.findMany({
-        where: eq(schema.tenantMemberships.tenantId, tenantId),
+        where: eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
         with: {
           user: {
             with: {
               tenantMemberships: {
-                where: eq(schema.tenantMemberships.tenantId, tenantId),
+                where: eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
               },
             },
           },
@@ -82,14 +82,14 @@ export class UsersService {
     if (tenantId) {
       const entry = await this.db.query.tenantMemberships.findFirst({
         where: and(
-          eq(schema.tenantMemberships.tenantId, tenantId),
-          eq(schema.tenantMemberships.userId, id),
+          eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
+          eq(drizzleSchema.tenantMemberships.userId, id),
         ),
         with: {
           user: {
             with: {
               tenantMemberships: {
-                where: eq(schema.tenantMemberships.tenantId, tenantId),
+                where: eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
               },
             },
           },
@@ -99,7 +99,7 @@ export class UsersService {
       return entry.user;
     } else {
       return await this.db.query.users.findFirst({
-        where: eq(schema.users.id, id),
+        where: eq(drizzleSchema.users.id, id),
         with: {
           tenantMemberships: true,
         },
@@ -109,7 +109,7 @@ export class UsersService {
 
   async findOneByEmail(email: string): Promise<User> {
     const user = await this.db.query.users.findFirst({
-      where: eq(schema.users.email, email),
+      where: eq(drizzleSchema.users.email, email),
       with: {
         tenantMemberships: true,
       },
@@ -119,9 +119,9 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.db
-      .update(schema.users)
+      .update(drizzleSchema.users)
       .set(updateUserDto)
-      .where(eq(schema.users.id, id));
+      .where(eq(drizzleSchema.users.id, id));
 
     return await this.findOne(id);
   }
@@ -129,15 +129,17 @@ export class UsersService {
   async remove(id: number, tenantId?: number) {
     if (tenantId) {
       await this.db
-        .delete(schema.tenantMemberships)
+        .delete(drizzleSchema.tenantMemberships)
         .where(
           and(
-            eq(schema.tenantMemberships.tenantId, tenantId),
-            eq(schema.tenantMemberships.userId, id),
+            eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
+            eq(drizzleSchema.tenantMemberships.userId, id),
           ),
         );
     } else {
-      await this.db.delete(schema.users).where(eq(schema.users.id, id));
+      await this.db
+        .delete(drizzleSchema.users)
+        .where(eq(drizzleSchema.users.id, id));
     }
   }
 }

@@ -1,8 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from '../drizzle/schema';
 import { UsersService } from '../users/users.service';
-import { SystemRole, TenantRole, User } from '../drizzle/schema';
+import { SystemRole, TenantRole, User, drizzleSchema } from '../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 
@@ -10,7 +9,8 @@ import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 export class RolesService {
   private readonly logger = new Logger(RolesService.name);
   constructor(
-    @Inject('DB_PROD') private readonly db: PostgresJsDatabase<typeof schema>,
+    @Inject('DB_PROD')
+    private readonly db: PostgresJsDatabase<typeof drizzleSchema>,
     private readonly usersService: UsersService,
     private readonly requestMetaData: RequestMetadataProvider,
   ) {}
@@ -24,9 +24,9 @@ export class RolesService {
     }
 
     this.db
-      .update(schema.users)
+      .update(drizzleSchema.users)
       .set({ role })
-      .where(eq(schema.users.id, userId));
+      .where(eq(drizzleSchema.users.id, userId));
 
     return await this.usersService.findOne(userId);
   }
@@ -40,12 +40,12 @@ export class RolesService {
     }
 
     this.db
-      .update(schema.tenantMemberships)
+      .update(drizzleSchema.tenantMemberships)
       .set({ role })
       .where(
         and(
-          eq(schema.tenantMemberships.tenantId, tenantId),
-          eq(schema.tenantMemberships.userId, userId),
+          eq(drizzleSchema.tenantMemberships.tenantId, tenantId),
+          eq(drizzleSchema.tenantMemberships.userId, userId),
         ),
       );
 

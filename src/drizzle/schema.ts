@@ -54,16 +54,19 @@ export const tenantMemberships = pgTable('tenants_users', {
   role: tenantRoles('role').notNull().default('MEMBER'),
 });
 
-export const tenantUsersRelations = relations(tenantMemberships, ({ one }) => ({
-  tenant: one(tenants, {
-    fields: [tenantMemberships.tenantId],
-    references: [tenants.id],
+export const tenantMembershipRelations = relations(
+  tenantMemberships,
+  ({ one }) => ({
+    tenant: one(tenants, {
+      fields: [tenantMemberships.tenantId],
+      references: [tenants.id],
+    }),
+    user: one(users, {
+      fields: [tenantMemberships.userId],
+      references: [users.id],
+    }),
   }),
-  user: one(users, {
-    fields: [tenantMemberships.userId],
-    references: [users.id],
-  }),
-}));
+);
 
 export type SelectTenantMembership = typeof tenantMemberships.$inferSelect;
 
@@ -99,3 +102,17 @@ export const todosRelations = relations(todosTable, ({ one }) => ({
 }));
 
 export type SelectTodo = typeof todosTable.$inferSelect;
+
+export const drizzleSchema = {
+  systemRoles,
+  tenantRoles,
+  users,
+  usersRelations,
+  tenants,
+  tenantsRelations,
+  tenantMemberships,
+  tenantMembershipRelations,
+  todoStatusEnum,
+  todosTable,
+  todosRelations,
+};

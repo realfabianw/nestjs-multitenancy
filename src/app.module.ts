@@ -9,7 +9,7 @@ import { envValidationSchema } from './env-validation.schema';
 import { DrizzlePostgresModule } from '@knaadh/nestjs-drizzle-postgres';
 import { TenantsModule } from './tenants/tenants.module';
 import { RolesModule } from './roles/roles.module';
-import * as dbSchema from './drizzle/schema';
+import { drizzleSchema } from './drizzle/schema';
 
 @Module({
   imports: [
@@ -26,7 +26,7 @@ import * as dbSchema from './drizzle/schema';
           url: configService.get<string>('POSTGRES_URL_PROD'),
         },
         config: {
-          schema: dbSchema,
+          schema: drizzleSchema,
         },
       }),
     }),
