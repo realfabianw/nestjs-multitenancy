@@ -4,9 +4,9 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 import UserDto from '../users/dto/user.dto';
-import { SystemRole, TenantRole } from '../drizzle/schema';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
 import { Permission } from '../auth/entities/permissions.enum';
+import { SystemRole, TenantRole } from './roles.schema';
 
 @ApiTags('Roles')
 @Controller('users/:id/roles')

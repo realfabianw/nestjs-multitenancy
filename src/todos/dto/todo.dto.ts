@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { SelectTodo } from '../../drizzle/schema';
+import { SelectTodo } from '../todos.schema';
 
 export class TodoDto {
   @ApiProperty({

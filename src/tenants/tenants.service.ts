@@ -1,10 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import { SelectTenant, drizzleSchema } from '../drizzle/schema';
+import { drizzleSchema } from '../drizzle/schema';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { eq } from 'drizzle-orm';
+import { SelectTenant } from './tenants.schema';
 
 @Injectable()
 export class TenantsService {

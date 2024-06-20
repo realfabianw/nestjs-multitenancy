@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import UserDto from './dto/user.dto';
-import { User } from '../drizzle/schema';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequiresPermissions } from '../auth/decorators/permissions.decorator';
@@ -19,6 +18,7 @@ import { Permission } from '../auth/entities/permissions.enum';
 import { Response } from 'express';
 import { RequestMetadataProvider } from '../auth/request-metadata.provider';
 import { InviteUserDto } from './dto/invite-user.dto';
+import { User } from './users.schema';
 
 @ApiTags('Users')
 @Controller('users')

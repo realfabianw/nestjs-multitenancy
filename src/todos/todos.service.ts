@@ -4,7 +4,8 @@ import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { and, eq, isNull } from 'drizzle-orm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { SelectTodo, drizzleSchema } from '../drizzle/schema';
+import { drizzleSchema } from '../drizzle/schema';
+import { SelectTodo } from './todos.schema';
 
 @Injectable()
 export class TodosService {

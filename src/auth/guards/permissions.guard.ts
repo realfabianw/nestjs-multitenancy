@@ -5,13 +5,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { TenantRole, User } from '../../drizzle/schema';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { Permission } from '../entities/permissions.enum';
 import {
   getPermissionsFromSystemRole,
   getPermissionsFromTenantRole,
 } from '../role-permissions';
+import { User } from '../../users/users.schema';
+import { TenantRole } from '../../roles/roles.schema';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

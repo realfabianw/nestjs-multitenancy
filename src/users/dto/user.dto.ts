@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { SystemRole, TenantRole, User } from '../../drizzle/schema';
+import { SystemRole, TenantRole } from '../../roles/roles.schema';
+import { User } from '../users.schema';
 
 export default class UserDto {
   @ApiProperty({

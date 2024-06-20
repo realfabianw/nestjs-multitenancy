@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt-payload';
-import { User } from '../drizzle/schema';
+import { User } from '../users/users.schema';
 
 @Injectable()
 export class AuthService {

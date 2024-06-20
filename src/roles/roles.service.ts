@@ -1,9 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { UsersService } from '../users/users.service';
-import { SystemRole, TenantRole, User, drizzleSchema } from '../drizzle/schema';
+import { drizzleSchema } from '../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { RequestMetadataProvider } from '../auth/request-metadata.provider';
+import { SystemRole, TenantRole } from './roles.schema';
+import { User } from '../users/users.schema';
 
 @Injectable()
 export class RolesService {

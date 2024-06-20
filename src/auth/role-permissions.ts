@@ -1,4 +1,4 @@
-import { SystemRole, TenantRole } from '../drizzle/schema';
+import { SystemRole, TenantRole } from '../roles/roles.schema';
 import { Permission } from './entities/permissions.enum';
 
 export interface RolePermission<T> {

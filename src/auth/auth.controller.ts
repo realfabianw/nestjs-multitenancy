@@ -19,8 +19,8 @@ import { Response } from 'express';
 import UserDto from '../users/dto/user.dto';
 import { Public } from './decorators/authentication.decorator';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
-import { User } from '../drizzle/schema';
 import { Request } from 'express';
+import { User } from '../users/users.schema';
 
 @ApiTags('Auth')
 @Controller('auth')

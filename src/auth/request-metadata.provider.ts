@@ -1,7 +1,7 @@
 import { Injectable, Scope, Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { User } from '../drizzle/schema';
+import { User } from '../users/users.schema';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RequestMetadataProvider {

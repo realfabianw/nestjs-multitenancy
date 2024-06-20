@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTodoDto } from './create-todo.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { TodoStatus } from '../../drizzle/schema';
+import { TodoStatus } from '../todos.schema';
 
 export class UpdateTodoDto extends PartialType(CreateTodoDto) {
   @ApiProperty({

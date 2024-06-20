@@ -3,10 +3,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { SelectUser, User, drizzleSchema } from '../drizzle/schema';
+import { drizzleSchema } from '../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { takeUniqueOrThrow } from '../drizzle/extensions';
 import { InviteUserDto } from './dto/invite-user.dto';
+import { SelectUser, User } from './users.schema';
 
 /**
  * It seems that every service that is related to Passport and its JWT authentication strategy is not
